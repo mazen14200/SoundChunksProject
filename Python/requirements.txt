@@ -1,0 +1,50 @@
+# This project uses FFmpeg directly via subprocess, so no Python packages are required.
+# However, FFmpeg must be installed on the system and available in PATH.
+# 
+# To install FFmpeg:
+# - Windows: Download from https://ffmpeg.org/download.html and add to PATH
+# - macOS: brew install ffmpeg
+# - Linux: sudo apt-get install ffmpeg
+
+
+
+تمام. على Windows 10/11، نفّذ الأوامر التالية بالترتيب في CMD. أحدث إصدار Release ظاهر حاليًا من Gyan.dev هو FFmpeg 9.0.2، وGyan يذكر أن نسخة Essentials يمكن تثبيتها عبر winget.
+
+1. افتح CMD كمسؤول
+
+اضغط:
+
+Win + X
+
+ثم اختر Terminal (Admin) أو Command Prompt (Admin).
+
+2. ثبّت FFmpeg
+
+نفّذ:
+
+winget install "FFmpeg (Essentials Build)"
+
+انتظر حتى ينتهي التثبيت.
+
+3. أغلق CMD وافتح CMD جديد
+
+هذه الخطوة مهمة لأن متغيرات البيئة قد لا تتحدث في نافذة CMD القديمة.
+
+ثم نفّذ:
+
+ffmpeg -version
+
+وكذلك:
+
+where ffmpeg
+4. لو ظهر مسار FFmpeg
+
+مثلًا:
+
+C:\...\ffmpeg.exe
+
+فهذا يعني أن PATH أصبح يعمل بالفعل، ولن تحتاج لإضافته يدويًا.
+
+جرّب أيضًا:
+
+ffprobe -version
