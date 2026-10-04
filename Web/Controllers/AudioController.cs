@@ -12,15 +12,18 @@ public class AudioController : ControllerBase
 {
     private readonly IChunkManagerService _chunkManagerService;
     private readonly IProjectService _projectService;
+    private readonly IWaveformService _waveformService;
     private readonly ILogger<AudioController> _logger;
 
     public AudioController(
         IChunkManagerService chunkManagerService,
         IProjectService projectService,
+        IWaveformService waveformService,
         ILogger<AudioController> logger)
     {
         _chunkManagerService = chunkManagerService;
         _projectService = projectService;
+        _waveformService = waveformService;
         _logger = logger;
     }
 
@@ -42,7 +45,7 @@ public class AudioController : ControllerBase
             // Create uploads directory if it doesn't exist
             var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
             _logger.LogInformation("Uploads directory: {UploadsDir}", uploadsDir);
-            
+
             if (!Directory.Exists(uploadsDir))
             {
                 Directory.CreateDirectory(uploadsDir);
@@ -76,7 +79,8 @@ public class AudioController : ControllerBase
                 NextChunkNumber = nextChunkNumber
             };
 
-            var response = new { 
+            var response = new
+            {
                 project = viewModel
             };
 
@@ -100,7 +104,7 @@ public class AudioController : ControllerBase
                 return BadRequest(new { error = "Request body is null" });
             }
 
-            if (string.IsNullOrEmpty(request.ProjectName) || 
+            if (string.IsNullOrEmpty(request.ProjectName) ||
                 request.CurrentPosition < 0)
             {
                 return BadRequest(new { error = "Invalid request parameters" });
@@ -119,7 +123,8 @@ public class AudioController : ControllerBase
             var state = await _projectService.GetProjectStateAsync(request.ProjectName);
             var nextChunkNumber = await _projectService.GetNextChunkNumberAsync(projectPath);
 
-            var response = new { 
+            var response = new
+            {
                 chunkNumber,
                 lastCutPosition = state?.LastCutPosition ?? 0,
                 nextChunkNumber
@@ -131,6 +136,31 @@ public class AudioController : ControllerBase
         {
             _logger.LogError(ex, "Error cutting audio");
             return StatusCode(500, new { error = $"Error cutting audio: {ex.Message}" });
+        }
+    }
+
+    [HttpGet("waveform/{projectName}")]
+    public async Task<IActionResult> GetWaveform(string projectName)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(projectName))
+            {
+                return BadRequest(new { error = "Project name is required" });
+            }
+
+            var (success, data, errorMessage) = await _waveformService.GetWaveformAsync(projectName);
+            if (!success || data == null)
+            {
+                return BadRequest(new { error = errorMessage });
+            }
+
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting waveform");
+            return StatusCode(500, new { error = "Could not generate the waveform." });
         }
     }
 

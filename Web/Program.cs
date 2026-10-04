@@ -29,6 +29,7 @@ builder.Services.AddSingleton<IProjectService, ProjectService>();
 builder.Services.AddSingleton<IPythonAudioCutterService, PythonAudioCutterService>();
 builder.Services.AddSingleton<IChunkManagerService, ChunkManagerService>();
 builder.Services.AddSingleton<IAudioProbeService, AudioProbeService>();
+builder.Services.AddSingleton<IWaveformService, WaveformService>();
 
 // Add CORS for file access
 builder.Services.AddCors(options =>
