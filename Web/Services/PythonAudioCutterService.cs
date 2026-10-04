@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using Microsoft.Extensions.Options;
 using SoundChunksWeb.Models;
 
@@ -8,6 +9,7 @@ public class PythonAudioCutterService : IPythonAudioCutterService
 {
     private readonly AudioProcessingSettings _settings;
     private readonly ILogger<PythonAudioCutterService> _logger;
+    private static readonly CultureInfo InvariantCulture = CultureInfo.InvariantCulture;
 
     public PythonAudioCutterService(
         IOptions<AudioProcessingSettings> settings,
@@ -43,9 +45,9 @@ public class PythonAudioCutterService : IPythonAudioCutterService
                 Directory.CreateDirectory(outputDir);
             }
 
-            // Build Python arguments
+            // Build Python arguments with invariant culture
             var scriptPath = Path.GetFullPath(_settings.PythonScript);
-            var arguments = $"\"{scriptPath}\" --input \"{inputFilePath}\" --output \"{outputFilePath}\" --start {startTime:F3} --end {endTime:F3}";
+            var arguments = $"\"{scriptPath}\" --input \"{inputFilePath}\" --output \"{outputFilePath}\" --start {startTime.ToString("F3", InvariantCulture)} --end {endTime.ToString("F3", InvariantCulture)} --ffmpeg \"{_settings.FfmpegExecutable}\"";
 
             _logger.LogInformation("Executing Python: {PythonExecutable} {Arguments}", _settings.PythonExecutable, arguments);
 

@@ -6,8 +6,7 @@ public interface IChunkManagerService
 {
     Task<(bool Success, int ChunkNumber, string ErrorMessage)> CreateChunkAsync(
         string projectName,
-        string sourceFilePath,
         double currentPosition);
     
-    Task<ProjectState> GetOrCreateProjectAsync(string sourceFileName, double duration);
+    Task<ProjectState> GetOrCreateProjectAsync(string sourceFileName, string sourceStoredName, string sourceFilePath);
 }

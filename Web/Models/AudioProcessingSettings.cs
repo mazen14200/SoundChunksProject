@@ -8,4 +8,5 @@ public class AudioProcessingSettings
     public string PythonExecutable { get; set; } = "python";
     public string PythonScript { get; set; } = "../Python/audio_cutter.py";
     public string FfmpegExecutable { get; set; } = "ffmpeg";
+    public string FfprobeExecutable { get; set; } = "ffprobe";
 }

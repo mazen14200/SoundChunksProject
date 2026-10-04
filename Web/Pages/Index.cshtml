@@ -80,7 +80,6 @@
         let wavesurfer;
         let audioPlayer;
         let currentProject = null;
-        let sourceFilePath = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             audioPlayer = document.getElementById('audioPlayer');
@@ -145,7 +144,6 @@
                 }
 
                 const data = await response.json();
-                sourceFilePath = data.filePath;
                 currentProject = data.project;
 
                 // Update UI
@@ -154,9 +152,10 @@
                 document.getElementById('fileInfo').style.display = 'block';
                 document.getElementById('playerCard').style.display = 'block';
 
-                // Load audio
-                audioPlayer.src = sourceFilePath;
-                wavesurfer.load(sourceFilePath);
+                // Load audio from the uploaded file (using Object URL)
+                const audioUrl = URL.createObjectURL(file);
+                audioPlayer.src = audioUrl;
+                wavesurfer.load(audioUrl);
 
                 // Update project info
                 updateProjectInfo();
@@ -189,7 +188,7 @@
         }
 
         async function cutAudio() {
-            if (!currentProject || !sourceFilePath) {
+            if (!currentProject) {
                 showStatus('danger', 'No audio file loaded');
                 return;
             }
@@ -209,7 +208,6 @@
                     },
                     body: JSON.stringify({
                         projectName: currentProject.projectName,
-                        sourceFilePath: sourceFilePath,
                         currentPosition: currentPosition
                     })
                 });

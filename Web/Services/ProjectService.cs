@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SoundChunksWeb.Models;
 
@@ -8,10 +9,12 @@ public class ProjectService : IProjectService
 {
     private readonly AudioProcessingSettings _settings;
     private readonly string _outputRoot;
+    private readonly ILogger<ProjectService> _logger;
 
-    public ProjectService(IOptions<AudioProcessingSettings> settings)
+    public ProjectService(IOptions<AudioProcessingSettings> settings, ILogger<ProjectService> logger)
     {
         _settings = settings.Value;
+        _logger = logger;
         _outputRoot = Path.GetFullPath(_settings.OutputRoot);
         
         // Ensure output root directory exists
@@ -49,6 +52,7 @@ public class ProjectService : IProjectService
     {
         var projectPath = GetProjectPath(projectName);
         var stateFilePath = Path.Combine(projectPath, "project-state.json");
+        var stateFilePathBak = stateFilePath + ".bak";
 
         if (!File.Exists(stateFilePath))
         {
@@ -62,8 +66,24 @@ public class ProjectService : IProjectService
         }
         catch (Exception ex)
         {
-            // Log error but don't throw - allow project to be recreated
-            Console.WriteLine($"Error reading project state: {ex.Message}");
+            _logger.LogWarning(ex, "Error reading project state from main file, trying backup");
+            
+            // Try to load from backup
+            if (File.Exists(stateFilePathBak))
+            {
+                try
+                {
+                    var bakJson = await File.ReadAllTextAsync(stateFilePathBak);
+                    var state = JsonSerializer.Deserialize<ProjectState>(bakJson);
+                    _logger.LogInformation("Successfully loaded project state from backup");
+                    return state;
+                }
+                catch (Exception bakEx)
+                {
+                    _logger.LogError(bakEx, "Error reading project state from backup file");
+                }
+            }
+            
             return null;
         }
     }
@@ -79,6 +99,9 @@ public class ProjectService : IProjectService
         }
 
         var stateFilePath = Path.Combine(projectPath, "project-state.json");
+        var stateFilePathTmp = stateFilePath + ".tmp";
+        var stateFilePathBak = stateFilePath + ".bak";
+        
         state.LastModified = DateTime.UtcNow;
         
         var json = JsonSerializer.Serialize(state, new JsonSerializerOptions
@@ -86,7 +109,24 @@ public class ProjectService : IProjectService
             WriteIndented = true
         });
 
-        await File.WriteAllTextAsync(stateFilePath, json);
+        // Atomic write: write to temp file, then replace
+        await File.WriteAllTextAsync(stateFilePathTmp, json);
+        
+        // Create backup of existing file
+        if (File.Exists(stateFilePath))
+        {
+            try
+            {
+                File.Copy(stateFilePath, stateFilePathBak, true);
+            }
+            catch
+            {
+                // Ignore backup errors
+            }
+        }
+        
+        // Replace atomic
+        File.Move(stateFilePathTmp, stateFilePath, true);
     }
 
     public async Task<int> GetNextChunkNumberAsync(string projectPath)

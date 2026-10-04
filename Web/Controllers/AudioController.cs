@@ -61,8 +61,8 @@ public class AudioController : ControllerBase
             }
             _logger.LogInformation("File saved successfully");
 
-            // Get or create project
-            var state = await _chunkManagerService.GetOrCreateProjectAsync(sanitizedName, 0);
+            // Get or create project with actual duration
+            var state = await _chunkManagerService.GetOrCreateProjectAsync(file.FileName, sanitizedName, filePath);
 
             var projectPath = _projectService.GetProjectPath(state.ProjectName);
             var nextChunkNumber = await _projectService.GetNextChunkNumberAsync(projectPath);
@@ -77,7 +77,6 @@ public class AudioController : ControllerBase
             };
 
             var response = new { 
-                filePath = $"/uploads/{sanitizedName}",
                 project = viewModel
             };
 
@@ -102,7 +101,6 @@ public class AudioController : ControllerBase
             }
 
             if (string.IsNullOrEmpty(request.ProjectName) || 
-                string.IsNullOrEmpty(request.SourceFilePath) ||
                 request.CurrentPosition < 0)
             {
                 return BadRequest(new { error = "Invalid request parameters" });
@@ -110,7 +108,6 @@ public class AudioController : ControllerBase
 
             var (success, chunkNumber, errorMessage) = await _chunkManagerService.CreateChunkAsync(
                 request.ProjectName,
-                request.SourceFilePath,
                 request.CurrentPosition);
 
             if (!success)
@@ -178,6 +175,5 @@ public class AudioController : ControllerBase
 public class CutRequest
 {
     public string ProjectName { get; set; } = string.Empty;
-    public string SourceFilePath { get; set; } = string.Empty;
     public double CurrentPosition { get; set; }
 }

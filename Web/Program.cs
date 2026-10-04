@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.Features;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 
 // Configure file upload size limit
@@ -27,6 +28,7 @@ builder.Services.Configure<AudioProcessingSettings>(
 builder.Services.AddSingleton<IProjectService, ProjectService>();
 builder.Services.AddSingleton<IPythonAudioCutterService, PythonAudioCutterService>();
 builder.Services.AddSingleton<IChunkManagerService, ChunkManagerService>();
+builder.Services.AddSingleton<IAudioProbeService, AudioProbeService>();
 
 // Add CORS for file access
 builder.Services.AddCors(options =>
@@ -89,6 +91,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.MapStaticAssets();
+app.MapControllers();
 app.MapRazorPages()
    .WithStaticAssets();
 

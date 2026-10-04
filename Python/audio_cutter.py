@@ -8,6 +8,7 @@ import argparse
 import sys
 import subprocess
 import os
+import math
 from pathlib import Path
 
 
@@ -66,6 +67,11 @@ def validate_arguments(args):
         print(f"Error: Input file does not exist: {args.input}", file=sys.stderr)
         return False
     
+    # Validate start/end times are finite
+    if not math.isfinite(args.start) or not math.isfinite(args.end):
+        print(f"Error: Start and end times must be finite numbers", file=sys.stderr)
+        return False
+    
     # Validate start/end times
     if args.start < 0:
         print(f"Error: Start time must be non-negative, got {args.start}", file=sys.stderr)
@@ -92,21 +98,31 @@ def cut_audio(args):
     try:
         # Build FFmpeg command
         # -ss: start time
-        # -to: end time (duration from start)
         # -i: input file
+        # -t: duration
+        # -vn: no video
+        # -map 0:a:0: map first audio stream
         # -c:a libmp3lame: encode as MP3
         # -b:a: bitrate
-        # -y: overwrite output file if exists
+        # -nostdin: don't read from stdin
+        # -hide_banner: hide FFmpeg banner
+        # -loglevel error: only show errors
         duration = args.end - args.start
         
         cmd = [
             args.ffmpeg,
-            "-ss", str(args.start),
-            "-i", args.input,
-            "-t", str(duration),
+            "-nostdin",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-ss", f"{args.start:.3f}",
+            "-i", f"file:{args.input}",
+            "-t", f"{duration:.3f}",
+            "-vn",
+            "-map", "0:a:0",
             "-c:a", "libmp3lame",
             "-b:a", args.bitrate,
-            "-y",
+            "-f", "mp3",
             args.output
         ]
         
@@ -151,7 +167,7 @@ def main():
     args = parse_arguments()
     
     if not validate_arguments(args):
-        sys.exit(1)
+        sys.exit(2)
     
     if cut_audio(args):
         sys.exit(0)
