@@ -54,8 +54,8 @@
             <button type="button" class="ac-btn ac-btn-primary" id="btnPlay" disabled>Play</button>
             <button type="button" class="ac-btn" id="btnPause" disabled>Pause</button>
             <button type="button" class="ac-btn" id="btnResume" disabled>Resume</button>
-            <button type="button" class="ac-btn" id="btnStop" disabled>Stop</button>
             <button type="button" class="ac-btn" id="btnFwd" title="Go forward 10 seconds" disabled>+10 s</button>
+            <button type="button" class="ac-btn" id="btnStop" disabled style="visibility: hidden!important;">Return 0.00</button>
         </div>
 
         <div class="ac-group ac-zoom" role="group" aria-label="Zoom">
@@ -65,6 +65,26 @@
         </div>
 
         <button type="button" class="ac-btn ac-btn-cut" id="btnCut" disabled>CUT</button>
+    </section>
+
+    <section class="ac-speed" aria-label="Playback speed">
+        <span class="ac-speed-title">Speed</span>
+        <button type="button" class="ac-btn ac-btn-quiet" id="speedDown" title="Slower">&minus;</button>
+        <input type="range" id="speed" class="ac-seek ac-speed-range" min="0" max="1000" step="1" value="500"
+               aria-label="Playback speed" />
+        <button type="button" class="ac-btn ac-btn-quiet" id="speedUp" title="Faster">+</button>
+        <button type="button" class="ac-btn ac-speed-value" id="speedValue" title="Click to reset to 100%">100%</button>
+        <div class="ac-speed-presets" role="group" aria-label="Speed presets">
+            <button type="button" class="ac-chip" data-speed="25" aria-pressed="false">25%</button>
+            <button type="button" class="ac-chip" data-speed="50" aria-pressed="false">50%</button>
+            <button type="button" class="ac-chip" data-speed="75" aria-pressed="false">75%</button>
+            <button type="button" class="ac-chip" data-speed="100" aria-pressed="false">100%</button>
+            <button type="button" class="ac-chip" data-speed="125" aria-pressed="false">125%</button>
+            <button type="button" class="ac-chip" data-speed="150" aria-pressed="false">150%</button>
+            <button type="button" class="ac-chip" data-speed="200" aria-pressed="false">200%</button>
+            <button type="button" class="ac-chip" data-speed="300" aria-pressed="false">300%</button>
+            <button type="button" class="ac-chip" data-speed="400" aria-pressed="false">400%</button>
+        </div>
     </section>
 
     <audio id="audio" preload="auto"></audio>

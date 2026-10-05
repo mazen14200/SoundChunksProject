@@ -19,6 +19,18 @@
     const MAX_PPS = 400;
     const SILENCE = 0.07;                    // below this (sqrt-scaled, roughly -46 dBFS) a bar becomes a flat line
     const MIN_REF = 0.3;                     // never amplify a very quiet recording beyond this reference level
+    const SPEED_MIN = 25;                    // playback speed range, in percent
+    const SPEED_MAX = 400;
+    const SPEED_DEFAULT = 100;
+    const SPEED_KEY = 'audioStudio.speed';   // remembered between visits
+    const SPEED_RES = 1000;                  // resolution of the (logarithmic) speed slider
+    // the speeds the -/+ buttons, the slider and the keyboard snap to
+    const SPEED_LADDER = (function () {
+        const a = [];
+        for (let v = 25; v <= 200; v += 5) a.push(v);
+        for (let v = 210; v <= 400; v += 10) a.push(v);
+        return a;
+    })();
 
     // ---------- drawing constants ----------
     const BAR_W = 2;
@@ -36,7 +48,8 @@
         seek: $('seek'), audio: $('audio'), toast: $('toast'),
         btnBack: $('btnBack'), btnFwd: $('btnFwd'), btnPlay: $('btnPlay'), btnPause: $('btnPause'),
         btnResume: $('btnResume'), btnStop: $('btnStop'), btnCut: $('btnCut'),
-        zoomIn: $('zoomIn'), zoomOut: $('zoomOut'), zoomFit: $('zoomFit')
+        zoomIn: $('zoomIn'), zoomOut: $('zoomOut'), zoomFit: $('zoomFit'),
+        speed: $('speed'), speedDown: $('speedDown'), speedUp: $('speedUp'), speedValue: $('speedValue')
     };
     if (!el.app || !el.canvas) return;
 
@@ -53,6 +66,7 @@
         cutting: false,
         transport: 'stopped',  // 'stopped' | 'playing' | 'paused'
         pps: DEFAULT_PPS,
+        speed: SPEED_DEFAULT,  // playback speed in percent
         peaks: null,           // Uint8Array, sqrt-scaled 0..255
         peaksPerSecond: 25,
         ref: 1,
@@ -532,6 +546,100 @@
     });
 
     // =====================================================================
+    // playback speed (25% - 400%)
+    // =====================================================================
+
+    const speedChips = Array.prototype.slice.call(el.app.querySelectorAll('[data-speed]'));
+
+    // nearest value on the ladder
+    function snapSpeed(pct) {
+        if (!isFinite(pct)) return SPEED_DEFAULT;
+        pct = clamp(pct, SPEED_MIN, SPEED_MAX);
+        let best = SPEED_LADDER[0];
+        let bestDist = Infinity;
+        for (let i = 0; i < SPEED_LADDER.length; i++) {
+            const d = Math.abs(SPEED_LADDER[i] - pct);
+            if (d < bestDist) { bestDist = d; best = SPEED_LADDER[i]; }
+        }
+        return best;
+    }
+
+    // the slider is logarithmic, so 100% sits in the middle and every step feels equally big
+    function speedToPos(pct) {
+        return Math.round(SPEED_RES * Math.log(pct / SPEED_MIN) / Math.log(SPEED_MAX / SPEED_MIN));
+    }
+
+    function posToSpeed(pos) {
+        return SPEED_MIN * Math.pow(SPEED_MAX / SPEED_MIN, pos / SPEED_RES);
+    }
+
+    function applySpeedToAudio() {
+        const rate = S.speed / 100;
+        audio.defaultPlaybackRate = rate;   // survives choosing another file (load() resets to this value)
+        audio.playbackRate = rate;
+        // keep the voice natural when faster/slower (already the default in current browsers)
+        audio.preservesPitch = true;
+        audio.mozPreservesPitch = true;
+        audio.webkitPreservesPitch = true;
+    }
+
+    function setSpeed(pct, persist) {
+        const snapped = snapSpeed(pct);
+        S.speed = snapped;
+        applySpeedToAudio();
+
+        const pos = speedToPos(snapped);
+        el.speed.value = String(pos);
+        el.speed.style.setProperty('--p', (pos / SPEED_RES * 100) + '%');
+        el.speed.setAttribute('aria-valuetext', snapped + '%');
+        el.speedValue.textContent = snapped + '%';
+        el.speedDown.disabled = snapped <= SPEED_MIN;
+        el.speedUp.disabled = snapped >= SPEED_MAX;
+        speedChips.forEach(function (b) {
+            b.setAttribute('aria-pressed', String(Number(b.dataset.speed) === snapped));
+        });
+
+        if (persist !== false) {
+            try { localStorage.setItem(SPEED_KEY, String(snapped)); } catch (_) { /* storage may be blocked */ }
+        }
+    }
+
+    function stepSpeed(direction) {
+        let i = SPEED_LADDER.indexOf(S.speed);
+        if (i < 0) i = SPEED_LADDER.indexOf(snapSpeed(S.speed));
+        setSpeed(SPEED_LADDER[clamp(i + direction, 0, SPEED_LADDER.length - 1)]);
+    }
+
+    el.speed.addEventListener('input', function () {
+        setSpeed(posToSpeed(parseFloat(el.speed.value)));
+    });
+    // arrow keys on a logarithmic slider would move less than one ladder step, so handle them directly
+    el.speed.addEventListener('keydown', function (e) {
+        let handled = true;
+        switch (e.key) {
+            case 'ArrowLeft': case 'ArrowDown': stepSpeed(-1); break;
+            case 'ArrowRight': case 'ArrowUp': stepSpeed(1); break;
+            case 'PageDown': stepSpeed(-5); break;
+            case 'PageUp': stepSpeed(5); break;
+            case 'Home': setSpeed(SPEED_MIN); break;
+            case 'End': setSpeed(SPEED_MAX); break;
+            default: handled = false;
+        }
+        if (handled) e.preventDefault();
+    });
+    el.speedDown.addEventListener('click', function () { stepSpeed(-1); });
+    el.speedUp.addEventListener('click', function () { stepSpeed(1); });
+    el.speedValue.addEventListener('click', function () { setSpeed(SPEED_DEFAULT); });
+    speedChips.forEach(function (b) {
+        b.addEventListener('click', function () { setSpeed(Number(b.dataset.speed)); });
+    });
+    // something else changed the rate (e.g. browser media controls): keep the UI in step
+    audio.addEventListener('ratechange', function () {
+        const pct = Math.round(audio.playbackRate * 100);
+        if (pct !== S.speed) setSpeed(pct);
+    });
+
+    // =====================================================================
     // audio element events
     // =====================================================================
 
@@ -543,6 +651,7 @@
 
     audio.addEventListener('loadedmetadata', function () {
         S.ready = true;
+        applySpeedToAudio();
         updateDurationUi();
         onTime();
         updateControls();
@@ -736,6 +845,13 @@
     } else {
         window.addEventListener('resize', layout);
     }
+
+    let savedSpeed = SPEED_DEFAULT;
+    try {
+        const stored = parseFloat(localStorage.getItem(SPEED_KEY));
+        if (isFinite(stored)) savedSpeed = stored;
+    } catch (_) { /* storage may be blocked */ }
+    setSpeed(savedSpeed, false);
 
     updateControls();
     layout();
