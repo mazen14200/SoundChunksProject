@@ -67,6 +67,185 @@
         .green-mode .quraan-navbar {
             background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
         }
+
+        /* Main Layout Structure */
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .content-area {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        /* Person Card Styles */
+        .person-card {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .person-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+
+        .person-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
+        }
+
+        .person-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .person-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .person-description {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: rgba(255,255,255,0.9);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+            /* Luxury Premium Card Colors */
+
+            .card-blue {
+                background: linear-gradient(135deg, #101D3A 0%, #243B64 55%, #344F78 100%);
+            }
+
+            .card-green {
+                background: linear-gradient(135deg, #102E28 0%, #1C5143 55%, #286653 100%);
+            }
+
+            .card-orange {
+                background: linear-gradient(135deg, #46251D 0%, #743D2B 55%, #98583B 100%);
+            }
+
+            .card-purple {
+                background: linear-gradient(135deg, #281A3D 0%, #493064 55%, #64447D 100%);
+            }
+
+            .card-red {
+                background: linear-gradient(135deg, #421D28 0%, #702D3B 55%, #914453 100%);
+            }
+
+            .card-teal {
+                background: linear-gradient(135deg, #102D35 0%, #1B4B55 55%, #286571 100%);
+            }
+
+                /* Elegant Typography */
+
+                .card-blue .person-name,
+                .card-green .person-name,
+                .card-orange .person-name,
+                .card-purple .person-name,
+                .card-red .person-name,
+                .card-teal .person-name {
+                    color: #F1E8D8;
+                    font-weight: 700;
+                }
+
+                .card-blue .person-description,
+                .card-green .person-description,
+                .card-orange .person-description,
+                .card-purple .person-description,
+                .card-red .person-description,
+                .card-teal .person-description {
+                    color: #D0C9C0;
+                }
+
+            /* Luxury Hover Effect */
+
+            .card-blue,
+            .card-green,
+            .card-orange,
+            .card-purple,
+            .card-red,
+            .card-teal {
+                border: 1px solid rgba(220, 195, 155, 0.12);
+                border-radius: 16px;
+                box-shadow: 0 8px 24px rgba(8, 12, 24, 0.16);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+                .card-blue:hover,
+                .card-green:hover,
+                .card-orange:hover,
+                .card-purple:hover,
+                .card-red:hover,
+                .card-teal:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 14px 30px rgba(8, 12, 24, 0.25);
+                }
+
+        .card-teal .person-name,
+        .card-teal .person-description {
+            color: #2d3436;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+                order: -1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -81,8 +260,16 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container" style="padding: 20px;">
-        @RenderBody()
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            @await Component.InvokeAsync("PersonSidebar")
+        </aside>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            @RenderBody()
+        </div>
     </div>
 
     <!-- JavaScript for Theme Switching -->

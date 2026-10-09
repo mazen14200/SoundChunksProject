@@ -1,0 +1,17 @@
+@model List<SoundChunksWeb.Models.Person>
+
+@{
+    var cardColors = new List<string> { "card-blue", "card-green", "card-orange", "card-purple", "card-red", "card-teal" };
+}
+
+@foreach (var person in Model)
+{
+    var colorClass = cardColors[Model.IndexOf(person) % cardColors.Count];
+    <div class="person-card @colorClass">
+        <img src="~/@person.ImagePath" alt="@person.Name" class="person-image">
+        <div class="person-info">
+            <div class="person-name">@person.Name</div>
+            <div class="person-description">@person.Description</div>
+        </div>
+    </div>
+}
