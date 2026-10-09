@@ -1097,26 +1097,284 @@
             </section>
         </main>
         <footer>صُممت بعناية ومحبة <span>للقرآن الكريم</span> · اضغط على أي بطاقة لفتح رابطها الداخلي.</footer>
+
+        <!-- Modal for Sheikh Selection -->
+        <div id="sheikh-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2 class="modal-title">اختر طريقة العرض</h2>
+                <p class="modal-subtitle">هل تريد عرض السورة بدون صوت شيخ أم ستختار شيخ؟</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-primary" onclick="openWithoutSheikh()">
+                        نعم - بدون صوت شيخ
+                    </button>
+                    <button class="modal-btn modal-btn-secondary" onclick="closeModal()">
+                        لا - سأختار شيخ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast-notification" style="display: none;"></div>
+
+        <style>
+            /* Modal Styles */
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(5px);
+            }
+
+            .modal-content {
+                background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+                padding: 40px;
+                border-radius: 20px;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                border: 2px solid rgba(227, 194, 122, 0.3);
+            }
+
+            .modal-title {
+                color: #e3c27a;
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+                font-weight: bold;
+            }
+
+            .modal-subtitle {
+                color: #f7f5e9;
+                font-size: 1.1rem;
+                margin-bottom: 30px;
+                line-height: 1.6;
+            }
+
+            .modal-buttons {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .modal-btn {
+                padding: 15px 30px;
+                border: none;
+                border-radius: 12px;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                min-width: 180px;
+            }
+
+            .modal-btn-primary {
+                background: linear-gradient(135deg, #e3c27a 0%, #c9a65a 100%);
+                color: #1a472a;
+            }
+
+            .modal-btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(227, 194, 122, 0.4);
+            }
+
+            .modal-btn-secondary {
+                background: rgba(255, 255, 255, 0.1);
+                color: #f7f5e9;
+                border: 2px solid rgba(227, 194, 122, 0.5);
+            }
+
+            .modal-btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: translateY(-3px);
+            }
+
+            /* Toast Notification */
+            .toast-notification {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #e3c27a 0%, #c9a65a 100%);
+                color: #1a472a;
+                padding: 15px 30px;
+                border-radius: 12px;
+                font-weight: bold;
+                font-size: 1rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                z-index: 10001;
+                animation: slideUp 0.3s ease;
+            }
+
+            @@keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, 20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+            }
+
+            /* Selected Person Card */
+            .person-card.selected {
+                transform: translateY(-4px);
+                box-shadow: 0 0 0 3px #e3c27a, 0 14px 30px rgba(227, 194, 122, 0.4) !important;
+                animation: pulse-glow 2s infinite;
+            }
+
+            @@keyframes pulse-glow {
+                0%, 100% {
+                    box-shadow: 0 0 0 3px #e3c27a, 0 14px 30px rgba(227, 194, 122, 0.4);
+                }
+                50% {
+                    box-shadow: 0 0 0 5px #e3c27a, 0 14px 30px rgba(227, 194, 122, 0.6);
+                }
+            }
+        </style>
+
         <script>
-                    const searchInput = document.getElementById('search');
-                    const allCards = Array.from(document.querySelectorAll('.surah-card'));
-                    const resultCount = document.getElementById('result-count');
-                    const arabicDigits = value => value.replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
-                    searchInput.addEventListener('input', () => {
-                        const raw = searchInput.value.trim().toLocaleLowerCase();
-                        const query = arabicDigits(raw);
-                        let visible = 0;
-                        allCards.forEach(card => {
-                            const searchable = `${card.dataset.arabic} ${card.dataset.english} ${card.dataset.number} ${card.dataset.verses}`.toLocaleLowerCase();
-                            const matches = !query || searchable.includes(query);
-                            card.hidden = !matches;
-                            if (matches) visible++;
-                        });
-                        resultCount.textContent = query ? `عدد النتائج: ${visible} من ١١٤ سورة` : 'جميع السور الـ ١١٤';
-                    });
+            const searchInput = document.getElementById('search');
+            const allCards = Array.from(document.querySelectorAll('.surah-card'));
+            const resultCount = document.getElementById('result-count');
+            const arabicDigits = value => value.replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+
+            searchInput.addEventListener('input', () => {
+                const raw = searchInput.value.trim().toLocaleLowerCase();
+                const query = arabicDigits(raw);
+                let visible = 0;
+                allCards.forEach(card => {
+                    const searchable = `${card.dataset.arabic} ${card.dataset.english} ${card.dataset.number} ${card.dataset.verses}`.toLocaleLowerCase();
+                    const matches = !query || searchable.includes(query);
+                    card.hidden = !matches;
+                    if (matches) visible++;
+                });
+                resultCount.textContent = query ? `عدد النتائج: ${visible} من ١١٤ سورة` : 'جميع السور الـ ١١٤';
+            });
+
+            // Sheikh Selection Logic
+            let selectedSheikh = null;
+            let selectedSurah = null;
+
+            // Modify surah cards to show modal
+            allCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    selectedSurah = {
+                        id: card.id,
+                        number: card.dataset.number,
+                        arabic: card.dataset.arabic,
+                        english: card.dataset.english
+                    };
+
+                    if (selectedSheikh) {
+                        // If sheikh is selected, navigate with sheikh
+                        navigateToSurah(selectedSheikh);
+                    } else {
+                        // Show modal to choose
+                        showModal();
+                    }
+                });
+            });
+
+            // Person card selection
+            document.querySelectorAll('.person-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    // Remove selected class from all cards
+                    document.querySelectorAll('.person-card').forEach(c => c.classList.remove('selected'));
+
+                    // Add selected class to clicked card
+                    card.classList.add('selected');
+
+                    // Get person info from data attributes
+                    const id = card.dataset.personId;
+                    const name = card.dataset.personName;
+                    const image = card.dataset.personImage;
+
+                    selectedSheikh = {
+                        id: id,
+                        name: name,
+                        image: image
+                    };
+
+                    // If surah was selected, navigate
+                    if (selectedSurah) {
+                        navigateToSurah(selectedSheikh);
+                    }
+                });
+            });
+
+            function showModal() {
+                document.getElementById('sheikh-modal').style.display = 'flex';
+            }
+
+            function closeModal() {
+                document.getElementById('sheikh-modal').style.display = 'none';
+            }
+
+            function openWithoutSheikh() {
+                closeModal();
+                navigateToSurah(null);
+            }
+
+            async function navigateToSurah(sheikh) {
+                if (!selectedSurah) return;
+
+                // Construct URL
+                let url = `/Quraan/Surah/${selectedSurah.id}`;
+
+                if (sheikh) {
+                    // Check if audio file exists for this sheikh and surah
+                    try {
+                        const response = await fetch(`/api/AudioCheck/exists?sheikhId=${sheikh.id}&surahId=${selectedSurah.id}`);
+                        const result = await response.json();
+
+                        if (!result.exists) {
+                            showToast(`لم يُضف صوت الشيخ لهذه السورة بعد`);
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error checking audio file:', error);
+                        showToast(`حدث خطأ أثناء التحقق من الملف الصوتي`);
+                        return;
+                    }
+
+                    const sheikhId = encodeURIComponent(sheikh.id);
+                    const sheikhName = encodeURIComponent(sheikh.name);
+                    const sheikhImage = encodeURIComponent(sheikh.image);
+                    url += `?sheikhId=${sheikhId}&sheikh=${sheikhName}&sheikhImage=${sheikhImage}`;
+                }
+
+                window.location.href = url;
+            }
+
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.style.display = 'block';
+
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+
+            // Close modal on outside click
+            document.getElementById('sheikh-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'sheikh-modal') {
+                    closeModal();
+                }
+            });
         </script>
     </body>
-</html>
 
 
 

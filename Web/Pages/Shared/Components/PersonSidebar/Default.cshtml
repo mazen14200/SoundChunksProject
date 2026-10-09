@@ -7,7 +7,7 @@
 @foreach (var person in Model)
 {
     var colorClass = cardColors[Model.IndexOf(person) % cardColors.Count];
-    <div class="person-card @colorClass">
+    <div class="person-card @colorClass" data-person-id="@person.Id" data-person-name="@person.Name" data-person-image="@person.ImagePath">
         <img src="~/@person.ImagePath" alt="@person.Name" class="person-image">
         <div class="person-info">
             <div class="person-name">@person.Name</div>

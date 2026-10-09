@@ -12,36 +12,42 @@ public class PersonService
         {
             new Person
             {
+                Id = "Menshawi_Tartil",
                 Name = "القارئ الشيخ المنشاوي",
                 Description = "صوت عذب و مريح للقلوب (ترتيل) - محمد صديق المنشاوي",
                 ImagePath = "images/Sheikh/menshawii3.jpg"
             },
             new Person
             {
+                Id = "Menshawi_Talliem",
                 Name = "القارئ الثاني",
                 Description = "مقريء القرآن بخبرة طويلة في التلاوة",
                 ImagePath = "https://via.placeholder.com/70"
             },
             new Person
             {
+                Id = "Me3",
                 Name = "القارئ الثالث",
                 Description = "شيخ القراءات وأحد أعلام القراء",
                 ImagePath = "https://via.placeholder.com/70"
             },
             new Person
             {
+                Id = "Me4",
                 Name = "القارئ الرابع",
                 Description = "حفظ القرآن وقرأه بأكثر من رواية",
                 ImagePath = "https://via.placeholder.com/70"
             },
             new Person
             {
+                Id = "Me5",
                 Name = "القارئ الخامس",
                 Description = "أحد أشهر قراء العالم الإسلامي",
                 ImagePath = "https://via.placeholder.com/70"
             },
             new Person
             {
+                Id = "Me6",
                 Name = "القارئ السادس",
                 Description = "صاحب أداء رصين وتجويد فريد",
                 ImagePath = "https://via.placeholder.com/70"
