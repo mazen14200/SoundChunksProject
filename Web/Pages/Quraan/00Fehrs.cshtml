@@ -1,0 +1,1126 @@
+﻿@page
+@{
+    Layout = "_QuraanLayout";
+    ViewData["Title"] = "فهرس القرءآن الكريم";
+}
+
+
+<div class="ac-app" id="app">
+
+    <head>
+        <link src="~/css/Fhrs.css" rel="stylesheet" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#0b3028">
+        <title>سور القرآن الكريم | Quran Surahs</title>
+        <style>
+                    :root {
+                        --bg: #071d19;
+                        --panel: #0d3028;
+                        --panel2: #124237;
+                        --gold: #e3c27a;
+                        --mint: #a8d9bd;
+                        --text: #f7f5e9;
+                        --muted: #b1c9bd;
+                        --line: #ffffff18;
+                    }
+
+                    * {
+                        box-sizing: border-box
+                    }
+
+                    html {
+                        scroll-behavior: smooth
+                    }
+
+                    body {
+                        margin: 0;
+                        min-height: 100vh;
+                        color: var(--text);
+                        font-family: "Segoe UI",Tahoma,Arial,sans-serif;
+                        background: radial-gradient(ellipse at 50% -15%,#1c6850 0,transparent 46%), radial-gradient(circle at 0% 45%,#b98b3a0d,transparent 30%), var(--bg);
+                    }
+
+                    .page-shell {
+                        max-width: 1450px;
+                        margin: auto;
+                        padding: 0 28px
+                    }
+
+                    .hero {
+                        text-align: center;
+                        padding: 64px 16px 34px;
+                        position: relative
+                    }
+
+                    .ornament {
+                        color: var(--gold);
+                        font-size: 24px;
+                        letter-spacing: 12px;
+                        margin-bottom: 15px
+                    }
+
+                    h1 {
+                        font-family: Georgia,"Times New Roman",serif;
+                        font-size: clamp(2rem,5vw,3.7rem);
+                        font-weight: 600;
+                        line-height: 1.25;
+                        margin: 0;
+                        color: #fff9e9
+                    }
+
+                        h1 span {
+                            color: var(--gold)
+                        }
+
+                    .intro {
+                        color: var(--muted);
+                        font-size: 1rem;
+                        line-height: 1.9;
+                        margin: 14px auto 0;
+                        max-width: 620px
+                    }
+
+                    .stats {
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                        margin-top: 24px
+                    }
+
+                    .stat {
+                        border: 1px solid #e3c27a42;
+                        background: #ffffff08;
+                        border-radius: 999px;
+                        padding: 8px 16px;
+                        color: #e8dfc7;
+                        font-size: .88rem
+                    }
+
+                        .stat strong {
+                            color: var(--gold);
+                            margin-left: 5px
+                        }
+
+                    .toolbar {
+                        max-width: 780px;
+                        margin: 0 auto 30px;
+                        display: flex;
+                        gap: 12px;
+                        align-items: center
+                    }
+
+                    .search-wrap {
+                        position: relative;
+                        flex: 1
+                    }
+
+                    .search-icon {
+                        position: absolute;
+                        right: 17px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        color: var(--gold);
+                        font-size: 19px;
+                        pointer-events: none
+                    }
+
+                    #search {
+                        width: 100%;
+                        padding: 16px 48px 16px 16px;
+                        border: 1px solid #ffffff22;
+                        border-radius: 16px;
+                        background: #ffffff0c;
+                        color: white;
+                        font: inherit;
+                        outline: none;
+                        transition: .2s
+                    }
+
+                        #search::placeholder {
+                            color: #a6bdb1
+                        }
+
+                        #search:focus {
+                            border-color: var(--gold);
+                            box-shadow: 0 0 0 4px #e3c27a18;
+                            background: #ffffff10
+                        }
+
+                        #search::-webkit-search-cancel-button {
+                            cursor: pointer
+                        }
+
+                    .result-count {
+                        text-align: center;
+                        color: var(--muted);
+                        font-size: .88rem;
+                        margin: -14px 0 23px
+                    }
+
+                    .grid {
+                        display: grid;
+                        grid-template-columns: repeat(6,minmax(0,1fr));
+                        gap: 17px;
+                        padding-bottom: 54px
+                    }
+
+                    .surah-card {
+                        position: relative;
+                        isolation: isolate;
+                        overflow: hidden;
+                        min-height: 196px;
+                        padding: 18px 14px 17px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 9px;
+                        text-decoration: none;
+                        color: var(--text);
+                        border: 1px solid #d7c18b30;
+                        border-radius: 20px;
+                        background: linear-gradient(145deg,#16483aee,#0c2c25f5 76%);
+                        box-shadow: 0 9px 24px #0000001c,inset 0 1px 0 #ffffff0a;
+                        transition: transform .22s ease,border-color .22s ease,background .22s ease,box-shadow .22s ease;
+                        cursor: pointer;
+                    }
+
+                        .surah-card::before {
+                            content: "";
+                            position: absolute;
+                            z-index: -1;
+                            width: 180px;
+                            height: 180px;
+                            border-radius: 50%;
+                            top: -112px;
+                            left: -95px;
+                            background: #e3c27a0c;
+                            transition: transform .3s,background .3s
+                        }
+
+                        .surah-card::after {
+                            content: "";
+                            position: absolute;
+                            bottom: 0;
+                            right: 18%;
+                            left: 18%;
+                            height: 2px;
+                            background: linear-gradient(90deg,transparent,var(--gold),transparent);
+                            opacity: .45;
+                            transition: left .25s,right .25s,opacity .25s
+                        }
+
+                        .surah-card:hover, .surah-card:focus-visible {
+                            transform: translateY(-6px);
+                            border-color: #e3c27ac9;
+                            background: linear-gradient(145deg,#21674e,#124334 76%);
+                            box-shadow: 0 17px 35px #0000003d,0 0 0 1px #e3c27a16;
+                            outline: none;
+                        }
+
+                            .surah-card:hover::before, .surah-card:focus-visible::before {
+                                transform: scale(1.7);
+                                background: #e3c27a18
+                            }
+
+                            .surah-card:hover::after, .surah-card:focus-visible::after {
+                                left: 8%;
+                                right: 8%;
+                                opacity: 1
+                            }
+
+                        .surah-card:active {
+                            transform: translateY(-1px) scale(.985);
+                            background: #2c7658
+                        }
+
+                    .card-top {
+                        width: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        position: absolute;
+                        top: 13px;
+                        right: 0;
+                        padding: 0 15px
+                    }
+
+                    .surah-number {
+                        font-size: .72rem;
+                        font-weight: 700;
+                        letter-spacing: .13em;
+                        color: #d8cda9;
+                        background: #ffffff0a;
+                        border: 1px solid #ffffff12;
+                        border-radius: 8px;
+                        padding: 5px 7px;
+                        direction: ltr
+                    }
+
+                    .card-mark {
+                        font-size: 23px;
+                        color: var(--gold);
+                        opacity: .85;
+                        line-height: 1
+                    }
+
+                    .surah-arabic {
+                        font-family: "Traditional Arabic","Noto Naskh Arabic",Tahoma,serif;
+                        font-size: clamp(1.3rem,1.65vw,1.7rem);
+                        font-weight: 700;
+                        color: #fff7e2;
+                        margin-top: 19px;
+                        text-align: center;
+                        line-height: 1.5
+                    }
+
+                    .surah-english {
+                        font-size: .83rem;
+                        letter-spacing: .035em;
+                        color: #b8d1c2;
+                        text-align: center
+                    }
+
+                    .verse-count {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        margin-top: 5px;
+                        padding: 6px 12px;
+                        border: 1px solid #e3c27a2e;
+                        border-radius: 999px;
+                        background: #e3c27a0b;
+                        color: #f0dba6;
+                        font-size: .78rem;
+                        white-space: nowrap
+                    }
+
+                    .verse-icon {
+                        font-size: .75rem;
+                        color: var(--gold)
+                    }
+
+                    .empty {
+                        grid-column: 1/-1;
+                        text-align: center;
+                        padding: 50px 15px;
+                        border: 1px dashed #ffffff2a;
+                        border-radius: 18px;
+                        color: var(--muted)
+                    }
+
+                    footer {
+                        border-top: 1px solid var(--line);
+                        text-align: center;
+                        padding: 23px 10px 30px;
+                        color: #91ada0;
+                        font-size: .82rem;
+                        line-height: 1.8
+                    }
+
+                        footer span {
+                            color: var(--gold)
+                        }
+
+                    [hidden] {
+                        display: none !important
+                    }
+                    @@media(max - width:1100px) {
+                        .grid {
+                            grid-template-columns: repeat(4,minmax(0,1fr))
+                        }
+                    }
+                    @@media(max - width:760px) {
+                        .page-shell {
+                            padding: 0 16px
+                        }
+
+                        .hero {
+                            padding-top: 45px
+                        }
+
+                        .grid {
+                            grid-template-columns: repeat(3,minmax(0,1fr));
+                            gap: 12px
+                        }
+
+                        .surah-card {
+                            min-height: 175px;
+                            border-radius: 17px;
+                            padding-inline: 8px
+                        }
+
+                        .surah-arabic {
+                            font-size: 1.35rem
+                        }
+
+                        .surah-english {
+                            font-size: .74rem
+                        }
+                    }
+                    @@media(max - width:480px) {
+                        .grid {
+                            grid-template-columns: repeat(2,minmax(0,1fr));
+                            gap: 11px
+                        }
+
+                        .surah-card {
+                            min-height: 165px
+                        }
+
+                        .toolbar {
+                            margin-bottom: 27px
+                        }
+
+                        .hero {
+                            padding-inline: 0
+                        }
+
+                        .intro {
+                            font-size: .92rem
+                        }
+                    }
+                    @@media(prefers - reduced - motion:reduce) {
+                        *, *::before, *::after {
+                            scroll-behavior: auto !important;
+                            transition: none !important
+                        }
+                    }
+        </style>
+    </head>
+    <body>
+        <header class="hero page-shell">
+            <div class="ornament" aria-hidden="true">۞ ✧ ۞</div>
+            <h1>سُوَرُ <span>القرآن الكريم</span></h1>
+            <p class="intro">تصفّح سور القرآن الكريم في بطاقات أنيقة، مع اسم كل سورة ورقمها وعدد آياتها.</p>
+            <div class="stats">
+                <div class="stat"><strong>١١٤</strong> سورة</div>
+                <div class="stat"><strong>٦٢٣٦</strong> آية تقريبًا</div>
+                <div class="stat">تصميم متجاوب وأنيق</div>
+            </div>
+        </header>
+        <main class="page-shell">
+            <div class="toolbar">
+                <div class="search-wrap">
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <input id="search" type="search" placeholder="ابحث عن سورة بالاسم أو الرقم..." aria-label="ابحث عن سورة">
+                </div>
+            </div>
+            <p class="result-count" id="result-count" aria-live="polite">جميع السور الـ ١١٤</p>
+            <section class="grid" id="surah-grid" aria-label="بطاقات سور القرآن الكريم">
+                <a class="surah-card" id="1-Al-Fatihah" href="#1-Al-Fatihah" data-number="1" data-arabic="الفاتحة" data-english="al-fatihah" data-verses="7" aria-label="سورة الفاتحة، 7 آيات">
+                    <span class="card-top"><span class="surah-number">001</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الفاتحة</span>
+                    <span class="surah-english" dir="ltr">Al-Fatihah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 7 آية</span>
+                </a>
+                <a class="surah-card" id="2-Al-Baqarah" href="#2-Al-Baqarah" data-number="2" data-arabic="البقرة" data-english="al-baqarah" data-verses="286" aria-label="سورة البقرة، 286 آيات">
+                    <span class="card-top"><span class="surah-number">002</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">البقرة</span>
+                    <span class="surah-english" dir="ltr">Al-Baqarah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 286 آية</span>
+                </a>
+                <a class="surah-card" id="3-Ali-Imran" href="#3-Ali-Imran" data-number="3" data-arabic="آل عمران" data-english="ali-imran" data-verses="200" aria-label="سورة آل عمران، 200 آيات">
+                    <span class="card-top"><span class="surah-number">003</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">آل عمران</span>
+                    <span class="surah-english" dir="ltr">Ali-Imran</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 200 آية</span>
+                </a>
+                <a class="surah-card" id="4-An-Nisa" href="#4-An-Nisa" data-number="4" data-arabic="النساء" data-english="an-nisa" data-verses="176" aria-label="سورة النساء، 176 آيات">
+                    <span class="card-top"><span class="surah-number">004</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النساء</span>
+                    <span class="surah-english" dir="ltr">An-Nisa</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 176 آية</span>
+                </a>
+                <a class="surah-card" id="5-Al-Maidah" href="#5-Al-Maidah" data-number="5" data-arabic="المائدة" data-english="al-maidah" data-verses="120" aria-label="سورة المائدة، 120 آيات">
+                    <span class="card-top"><span class="surah-number">005</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المائدة</span>
+                    <span class="surah-english" dir="ltr">Al-Maidah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 120 آية</span>
+                </a>
+                <a class="surah-card" id="6-Al-Anam" href="#6-Al-Anam" data-number="6" data-arabic="الأنعام" data-english="al-anam" data-verses="165" aria-label="سورة الأنعام، 165 آيات">
+                    <span class="card-top"><span class="surah-number">006</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأنعام</span>
+                    <span class="surah-english" dir="ltr">Al-Anam</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 165 آية</span>
+                </a>
+                <a class="surah-card" id="7-Al-Araf" href="#7-Al-Araf" data-number="7" data-arabic="الأعراف" data-english="al-araf" data-verses="206" aria-label="سورة الأعراف، 206 آيات">
+                    <span class="card-top"><span class="surah-number">007</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأعراف</span>
+                    <span class="surah-english" dir="ltr">Al-Araf</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 206 آية</span>
+                </a>
+                <a class="surah-card" id="8-Al-Anfal" href="#8-Al-Anfal" data-number="8" data-arabic="الأنفال" data-english="al-anfal" data-verses="75" aria-label="سورة الأنفال، 75 آيات">
+                    <span class="card-top"><span class="surah-number">008</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأنفال</span>
+                    <span class="surah-english" dir="ltr">Al-Anfal</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 75 آية</span>
+                </a>
+                <a class="surah-card" id="9-At-Tawbah" href="#9-At-Tawbah" data-number="9" data-arabic="التوبة" data-english="at-tawbah" data-verses="129" aria-label="سورة التوبة، 129 آيات">
+                    <span class="card-top"><span class="surah-number">009</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">التوبة</span>
+                    <span class="surah-english" dir="ltr">At-Tawbah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 129 آية</span>
+                </a>
+                <a class="surah-card" id="10-Yunus" href="#10-Yunus" data-number="10" data-arabic="يونس" data-english="yunus" data-verses="109" aria-label="سورة يونس، 109 آيات">
+                    <span class="card-top"><span class="surah-number">010</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">يونس</span>
+                    <span class="surah-english" dir="ltr">Yunus</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 109 آية</span>
+                </a>
+                <a class="surah-card" id="11-Hud" href="#11-Hud" data-number="11" data-arabic="هود" data-english="hud" data-verses="123" aria-label="سورة هود، 123 آيات">
+                    <span class="card-top"><span class="surah-number">011</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">هود</span>
+                    <span class="surah-english" dir="ltr">Hud</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 123 آية</span>
+                </a>
+                <a class="surah-card" id="12-Yusuf" href="#12-Yusuf" data-number="12" data-arabic="يوسف" data-english="yusuf" data-verses="111" aria-label="سورة يوسف، 111 آيات">
+                    <span class="card-top"><span class="surah-number">012</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">يوسف</span>
+                    <span class="surah-english" dir="ltr">Yusuf</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 111 آية</span>
+                </a>
+                <a class="surah-card" id="13-Ar-Rad" href="#13-Ar-Rad" data-number="13" data-arabic="الرعد" data-english="ar-rad" data-verses="43" aria-label="سورة الرعد، 43 آيات">
+                    <span class="card-top"><span class="surah-number">013</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الرعد</span>
+                    <span class="surah-english" dir="ltr">Ar-Rad</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 43 آية</span>
+                </a>
+                <a class="surah-card" id="14-Ibrahim" href="#14-Ibrahim" data-number="14" data-arabic="إبراهيم" data-english="ibrahim" data-verses="52" aria-label="سورة إبراهيم، 52 آيات">
+                    <span class="card-top"><span class="surah-number">014</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">إبراهيم</span>
+                    <span class="surah-english" dir="ltr">Ibrahim</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 52 آية</span>
+                </a>
+                <a class="surah-card" id="15-Al-Hijr" href="#15-Al-Hijr" data-number="15" data-arabic="الحجر" data-english="al-hijr" data-verses="99" aria-label="سورة الحجر، 99 آيات">
+                    <span class="card-top"><span class="surah-number">015</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الحجر</span>
+                    <span class="surah-english" dir="ltr">Al-Hijr</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 99 آية</span>
+                </a>
+                <a class="surah-card" id="16-An-Nahl" href="#16-An-Nahl" data-number="16" data-arabic="النحل" data-english="an-nahl" data-verses="128" aria-label="سورة النحل، 128 آيات">
+                    <span class="card-top"><span class="surah-number">016</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النحل</span>
+                    <span class="surah-english" dir="ltr">An-Nahl</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 128 آية</span>
+                </a>
+                <a class="surah-card" id="17-Al-Isra" href="#17-Al-Isra" data-number="17" data-arabic="الإسراء" data-english="al-isra" data-verses="111" aria-label="سورة الإسراء، 111 آيات">
+                    <span class="card-top"><span class="surah-number">017</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الإسراء</span>
+                    <span class="surah-english" dir="ltr">Al-Isra</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 111 آية</span>
+                </a>
+                <a class="surah-card" id="18-Al-Kahf" href="#18-Al-Kahf" data-number="18" data-arabic="الكهف" data-english="al-kahf" data-verses="110" aria-label="سورة الكهف، 110 آيات">
+                    <span class="card-top"><span class="surah-number">018</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الكهف</span>
+                    <span class="surah-english" dir="ltr">Al-Kahf</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 110 آية</span>
+                </a>
+                <a class="surah-card" id="19-Maryam" href="#19-Maryam" data-number="19" data-arabic="مريم" data-english="maryam" data-verses="98" aria-label="سورة مريم، 98 آيات">
+                    <span class="card-top"><span class="surah-number">019</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">مريم</span>
+                    <span class="surah-english" dir="ltr">Maryam</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 98 آية</span>
+                </a>
+                <a class="surah-card" id="20-Ta-Ha" href="#20-Ta-Ha" data-number="20" data-arabic="طه" data-english="ta-ha" data-verses="135" aria-label="سورة طه، 135 آيات">
+                    <span class="card-top"><span class="surah-number">020</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">طه</span>
+                    <span class="surah-english" dir="ltr">Ta-Ha</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 135 آية</span>
+                </a>
+                <a class="surah-card" id="21-Al-Anbya" href="#21-Al-Anbya" data-number="21" data-arabic="الأنبياء" data-english="al-anbya" data-verses="112" aria-label="سورة الأنبياء، 112 آيات">
+                    <span class="card-top"><span class="surah-number">021</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأنبياء</span>
+                    <span class="surah-english" dir="ltr">Al-Anbya</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 112 آية</span>
+                </a>
+                <a class="surah-card" id="22-Al-Hajj" href="#22-Al-Hajj" data-number="22" data-arabic="الحج" data-english="al-hajj" data-verses="78" aria-label="سورة الحج، 78 آيات">
+                    <span class="card-top"><span class="surah-number">022</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الحج</span>
+                    <span class="surah-english" dir="ltr">Al-Hajj</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 78 آية</span>
+                </a>
+                <a class="surah-card" id="23-Al-Muminun" href="#23-Al-Muminun" data-number="23" data-arabic="المؤمنون" data-english="al-muminun" data-verses="118" aria-label="سورة المؤمنون، 118 آيات">
+                    <span class="card-top"><span class="surah-number">023</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المؤمنون</span>
+                    <span class="surah-english" dir="ltr">Al-Muminun</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 118 آية</span>
+                </a>
+                <a class="surah-card" id="24-An-Nur" href="#24-An-Nur" data-number="24" data-arabic="النور" data-english="an-nur" data-verses="64" aria-label="سورة النور، 64 آيات">
+                    <span class="card-top"><span class="surah-number">024</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النور</span>
+                    <span class="surah-english" dir="ltr">An-Nur</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 64 آية</span>
+                </a>
+                <a class="surah-card" id="25-Al-Furqan" href="#25-Al-Furqan" data-number="25" data-arabic="الفرقان" data-english="al-furqan" data-verses="77" aria-label="سورة الفرقان، 77 آيات">
+                    <span class="card-top"><span class="surah-number">025</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الفرقان</span>
+                    <span class="surah-english" dir="ltr">Al-Furqan</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 77 آية</span>
+                </a>
+                <a class="surah-card" id="26-Ash-Shuara" href="#26-Ash-Shuara" data-number="26" data-arabic="الشعراء" data-english="ash-shuara" data-verses="227" aria-label="سورة الشعراء، 227 آيات">
+                    <span class="card-top"><span class="surah-number">026</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الشعراء</span>
+                    <span class="surah-english" dir="ltr">Ash-Shuara</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 227 آية</span>
+                </a>
+                <a class="surah-card" id="27-An-Naml" href="#27-An-Naml" data-number="27" data-arabic="النمل" data-english="an-naml" data-verses="93" aria-label="سورة النمل، 93 آيات">
+                    <span class="card-top"><span class="surah-number">027</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النمل</span>
+                    <span class="surah-english" dir="ltr">An-Naml</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 93 آية</span>
+                </a>
+                <a class="surah-card" id="28-Al-Qasas" href="#28-Al-Qasas" data-number="28" data-arabic="القصص" data-english="al-qasas" data-verses="88" aria-label="سورة القصص، 88 آيات">
+                    <span class="card-top"><span class="surah-number">028</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">القصص</span>
+                    <span class="surah-english" dir="ltr">Al-Qasas</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 88 آية</span>
+                </a>
+                <a class="surah-card" id="29-Al-Ankabut" href="#29-Al-Ankabut" data-number="29" data-arabic="العنكبوت" data-english="al-ankabut" data-verses="69" aria-label="سورة العنكبوت، 69 آيات">
+                    <span class="card-top"><span class="surah-number">029</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">العنكبوت</span>
+                    <span class="surah-english" dir="ltr">Al-Ankabut</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 69 آية</span>
+                </a>
+                <a class="surah-card" id="30-Ar-Rum" href="#30-Ar-Rum" data-number="30" data-arabic="الروم" data-english="ar-rum" data-verses="60" aria-label="سورة الروم، 60 آيات">
+                    <span class="card-top"><span class="surah-number">030</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الروم</span>
+                    <span class="surah-english" dir="ltr">Ar-Rum</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 60 آية</span>
+                </a>
+                <a class="surah-card" id="31-Luqman" href="#31-Luqman" data-number="31" data-arabic="لقمان" data-english="luqman" data-verses="34" aria-label="سورة لقمان، 34 آيات">
+                    <span class="card-top"><span class="surah-number">031</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">لقمان</span>
+                    <span class="surah-english" dir="ltr">Luqman</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 34 آية</span>
+                </a>
+                <a class="surah-card" id="32-As-Sajdah" href="#32-As-Sajdah" data-number="32" data-arabic="السجدة" data-english="as-sajdah" data-verses="30" aria-label="سورة السجدة، 30 آيات">
+                    <span class="card-top"><span class="surah-number">032</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">السجدة</span>
+                    <span class="surah-english" dir="ltr">As-Sajdah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 30 آية</span>
+                </a>
+                <a class="surah-card" id="33-Al-Ahzab" href="#33-Al-Ahzab" data-number="33" data-arabic="الأحزاب" data-english="al-ahzab" data-verses="73" aria-label="سورة الأحزاب، 73 آيات">
+                    <span class="card-top"><span class="surah-number">033</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأحزاب</span>
+                    <span class="surah-english" dir="ltr">Al-Ahzab</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 73 آية</span>
+                </a>
+                <a class="surah-card" id="34-Saba" href="#34-Saba" data-number="34" data-arabic="سبأ" data-english="saba" data-verses="54" aria-label="سورة سبأ، 54 آيات">
+                    <span class="card-top"><span class="surah-number">034</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">سبأ</span>
+                    <span class="surah-english" dir="ltr">Saba</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 54 آية</span>
+                </a>
+                <a class="surah-card" id="35-Fatir" href="#35-Fatir" data-number="35" data-arabic="فاطر" data-english="fatir" data-verses="45" aria-label="سورة فاطر، 45 آيات">
+                    <span class="card-top"><span class="surah-number">035</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">فاطر</span>
+                    <span class="surah-english" dir="ltr">Fatir</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 45 آية</span>
+                </a>
+                <a class="surah-card" id="36-Ya-Sin" href="#36-Ya-Sin" data-number="36" data-arabic="يس" data-english="ya-sin" data-verses="83" aria-label="سورة يس، 83 آيات">
+                    <span class="card-top"><span class="surah-number">036</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">يس</span>
+                    <span class="surah-english" dir="ltr">Ya-Sin</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 83 آية</span>
+                </a>
+                <a class="surah-card" id="37-As-Saffat" href="#37-As-Saffat" data-number="37" data-arabic="الصافات" data-english="as-saffat" data-verses="182" aria-label="سورة الصافات، 182 آيات">
+                    <span class="card-top"><span class="surah-number">037</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الصافات</span>
+                    <span class="surah-english" dir="ltr">As-Saffat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 182 آية</span>
+                </a>
+                <a class="surah-card" id="38-Sad" href="#38-Sad" data-number="38" data-arabic="ص" data-english="sad" data-verses="88" aria-label="سورة ص، 88 آيات">
+                    <span class="card-top"><span class="surah-number">038</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">ص</span>
+                    <span class="surah-english" dir="ltr">Sad</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 88 آية</span>
+                </a>
+                <a class="surah-card" id="39-Az-Zumar" href="#39-Az-Zumar" data-number="39" data-arabic="الزمر" data-english="az-zumar" data-verses="75" aria-label="سورة الزمر، 75 آيات">
+                    <span class="card-top"><span class="surah-number">039</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الزمر</span>
+                    <span class="surah-english" dir="ltr">Az-Zumar</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 75 آية</span>
+                </a>
+                <a class="surah-card" id="40-Ghafir" href="#40-Ghafir" data-number="40" data-arabic="غافر" data-english="ghafir" data-verses="85" aria-label="سورة غافر، 85 آيات">
+                    <span class="card-top"><span class="surah-number">040</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">غافر</span>
+                    <span class="surah-english" dir="ltr">Ghafir</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 85 آية</span>
+                </a>
+                <a class="surah-card" id="41-Fussilat" href="#41-Fussilat" data-number="41" data-arabic="فصلت" data-english="fussilat" data-verses="54" aria-label="سورة فصلت، 54 آيات">
+                    <span class="card-top"><span class="surah-number">041</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">فصلت</span>
+                    <span class="surah-english" dir="ltr">Fussilat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 54 آية</span>
+                </a>
+                <a class="surah-card" id="42-Ash-Shura" href="#42-Ash-Shura" data-number="42" data-arabic="الشورى" data-english="ash-shura" data-verses="53" aria-label="سورة الشورى، 53 آيات">
+                    <span class="card-top"><span class="surah-number">042</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الشورى</span>
+                    <span class="surah-english" dir="ltr">Ash-Shura</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 53 آية</span>
+                </a>
+                <a class="surah-card" id="43-Az-Zukhruf" href="#43-Az-Zukhruf" data-number="43" data-arabic="الزخرف" data-english="az-zukhruf" data-verses="89" aria-label="سورة الزخرف، 89 آيات">
+                    <span class="card-top"><span class="surah-number">043</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الزخرف</span>
+                    <span class="surah-english" dir="ltr">Az-Zukhruf</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 89 آية</span>
+                </a>
+                <a class="surah-card" id="44-Ad-Dukhan" href="#44-Ad-Dukhan" data-number="44" data-arabic="الدخان" data-english="ad-dukhan" data-verses="59" aria-label="سورة الدخان، 59 آيات">
+                    <span class="card-top"><span class="surah-number">044</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الدخان</span>
+                    <span class="surah-english" dir="ltr">Ad-Dukhan</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 59 آية</span>
+                </a>
+                <a class="surah-card" id="45-Al-Jathiyah" href="#45-Al-Jathiyah" data-number="45" data-arabic="الجاثية" data-english="al-jathiyah" data-verses="37" aria-label="سورة الجاثية، 37 آيات">
+                    <span class="card-top"><span class="surah-number">045</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الجاثية</span>
+                    <span class="surah-english" dir="ltr">Al-Jathiyah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 37 آية</span>
+                </a>
+                <a class="surah-card" id="46-Al-Ahqaf" href="#46-Al-Ahqaf" data-number="46" data-arabic="الأحقاف" data-english="al-ahqaf" data-verses="35" aria-label="سورة الأحقاف، 35 آيات">
+                    <span class="card-top"><span class="surah-number">046</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأحقاف</span>
+                    <span class="surah-english" dir="ltr">Al-Ahqaf</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 35 آية</span>
+                </a>
+                <a class="surah-card" id="47-Muhammad" href="#47-Muhammad" data-number="47" data-arabic="محمد" data-english="muhammad" data-verses="38" aria-label="سورة محمد، 38 آيات">
+                    <span class="card-top"><span class="surah-number">047</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">محمد</span>
+                    <span class="surah-english" dir="ltr">Muhammad</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 38 آية</span>
+                </a>
+                <a class="surah-card" id="48-Al-Fath" href="#48-Al-Fath" data-number="48" data-arabic="الفتح" data-english="al-fath" data-verses="29" aria-label="سورة الفتح، 29 آيات">
+                    <span class="card-top"><span class="surah-number">048</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الفتح</span>
+                    <span class="surah-english" dir="ltr">Al-Fath</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 29 آية</span>
+                </a>
+                <a class="surah-card" id="49-Al-Hujurat" href="#49-Al-Hujurat" data-number="49" data-arabic="الحجرات" data-english="al-hujurat" data-verses="18" aria-label="سورة الحجرات، 18 آيات">
+                    <span class="card-top"><span class="surah-number">049</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الحجرات</span>
+                    <span class="surah-english" dir="ltr">Al-Hujurat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 18 آية</span>
+                </a>
+                <a class="surah-card" id="50-Qaf" href="#50-Qaf" data-number="50" data-arabic="ق" data-english="qaf" data-verses="45" aria-label="سورة ق، 45 آيات">
+                    <span class="card-top"><span class="surah-number">050</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">ق</span>
+                    <span class="surah-english" dir="ltr">Qaf</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 45 آية</span>
+                </a>
+                <a class="surah-card" id="51-Adh-Dhariyat" href="#51-Adh-Dhariyat" data-number="51" data-arabic="الذاريات" data-english="adh-dhariyat" data-verses="60" aria-label="سورة الذاريات، 60 آيات">
+                    <span class="card-top"><span class="surah-number">051</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الذاريات</span>
+                    <span class="surah-english" dir="ltr">Adh-Dhariyat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 60 آية</span>
+                </a>
+                <a class="surah-card" id="52-At-Tur" href="#52-At-Tur" data-number="52" data-arabic="الطور" data-english="at-tur" data-verses="49" aria-label="سورة الطور، 49 آيات">
+                    <span class="card-top"><span class="surah-number">052</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الطور</span>
+                    <span class="surah-english" dir="ltr">At-Tur</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 49 آية</span>
+                </a>
+                <a class="surah-card" id="53-An-Najm" href="#53-An-Najm" data-number="53" data-arabic="النجم" data-english="an-najm" data-verses="62" aria-label="سورة النجم، 62 آيات">
+                    <span class="card-top"><span class="surah-number">053</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النجم</span>
+                    <span class="surah-english" dir="ltr">An-Najm</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 62 آية</span>
+                </a>
+                <a class="surah-card" id="54-Al-Qamar" href="#54-Al-Qamar" data-number="54" data-arabic="القمر" data-english="al-qamar" data-verses="55" aria-label="سورة القمر، 55 آيات">
+                    <span class="card-top"><span class="surah-number">054</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">القمر</span>
+                    <span class="surah-english" dir="ltr">Al-Qamar</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 55 آية</span>
+                </a>
+                <a class="surah-card" id="55-Ar-Rahman" href="#55-Ar-Rahman" data-number="55" data-arabic="الرحمن" data-english="ar-rahman" data-verses="78" aria-label="سورة الرحمن، 78 آيات">
+                    <span class="card-top"><span class="surah-number">055</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الرحمن</span>
+                    <span class="surah-english" dir="ltr">Ar-Rahman</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 78 آية</span>
+                </a>
+                <a class="surah-card" id="56-Al-Waqiah" href="#56-Al-Waqiah" data-number="56" data-arabic="الواقعة" data-english="al-waqiah" data-verses="96" aria-label="سورة الواقعة، 96 آيات">
+                    <span class="card-top"><span class="surah-number">056</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الواقعة</span>
+                    <span class="surah-english" dir="ltr">Al-Waqiah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 96 آية</span>
+                </a>
+                <a class="surah-card" id="57-Al-Hadid" href="#57-Al-Hadid" data-number="57" data-arabic="الحديد" data-english="al-hadid" data-verses="29" aria-label="سورة الحديد، 29 آيات">
+                    <span class="card-top"><span class="surah-number">057</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الحديد</span>
+                    <span class="surah-english" dir="ltr">Al-Hadid</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 29 آية</span>
+                </a>
+                <a class="surah-card" id="58-Al-Mujadilah" href="#58-Al-Mujadilah" data-number="58" data-arabic="المجادلة" data-english="al-mujadilah" data-verses="22" aria-label="سورة المجادلة، 22 آيات">
+                    <span class="card-top"><span class="surah-number">058</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المجادلة</span>
+                    <span class="surah-english" dir="ltr">Al-Mujadilah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 22 آية</span>
+                </a>
+                <a class="surah-card" id="59-Al-Hashr" href="#59-Al-Hashr" data-number="59" data-arabic="الحشر" data-english="al-hashr" data-verses="24" aria-label="سورة الحشر، 24 آيات">
+                    <span class="card-top"><span class="surah-number">059</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الحشر</span>
+                    <span class="surah-english" dir="ltr">Al-Hashr</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 24 آية</span>
+                </a>
+                <a class="surah-card" id="60-Al-Mumtahanah" href="#60-Al-Mumtahanah" data-number="60" data-arabic="الممتحنة" data-english="al-mumtahanah" data-verses="13" aria-label="سورة الممتحنة، 13 آيات">
+                    <span class="card-top"><span class="surah-number">060</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الممتحنة</span>
+                    <span class="surah-english" dir="ltr">Al-Mumtahanah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 13 آية</span>
+                </a>
+                <a class="surah-card" id="61-As-Saff" href="#61-As-Saff" data-number="61" data-arabic="الصف" data-english="as-saff" data-verses="14" aria-label="سورة الصف، 14 آيات">
+                    <span class="card-top"><span class="surah-number">061</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الصف</span>
+                    <span class="surah-english" dir="ltr">As-Saff</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 14 آية</span>
+                </a>
+                <a class="surah-card" id="62-Al-Jumuah" href="#62-Al-Jumuah" data-number="62" data-arabic="الجمعة" data-english="al-jumuah" data-verses="11" aria-label="سورة الجمعة، 11 آيات">
+                    <span class="card-top"><span class="surah-number">062</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الجمعة</span>
+                    <span class="surah-english" dir="ltr">Al-Jumuah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 11 آية</span>
+                </a>
+                <a class="surah-card" id="63-Al-Munafiqun" href="#63-Al-Munafiqun" data-number="63" data-arabic="المنافقون" data-english="al-munafiqun" data-verses="11" aria-label="سورة المنافقون، 11 آيات">
+                    <span class="card-top"><span class="surah-number">063</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المنافقون</span>
+                    <span class="surah-english" dir="ltr">Al-Munafiqun</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 11 آية</span>
+                </a>
+                <a class="surah-card" id="64-At-Taghabun" href="#64-At-Taghabun" data-number="64" data-arabic="التغابن" data-english="at-taghabun" data-verses="18" aria-label="سورة التغابن، 18 آيات">
+                    <span class="card-top"><span class="surah-number">064</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">التغابن</span>
+                    <span class="surah-english" dir="ltr">At-Taghabun</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 18 آية</span>
+                </a>
+                <a class="surah-card" id="65-At-Talaq" href="#65-At-Talaq" data-number="65" data-arabic="الطلاق" data-english="at-talaq" data-verses="12" aria-label="سورة الطلاق، 12 آيات">
+                    <span class="card-top"><span class="surah-number">065</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الطلاق</span>
+                    <span class="surah-english" dir="ltr">At-Talaq</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 12 آية</span>
+                </a>
+                <a class="surah-card" id="66-At-Tahrim" href="#66-At-Tahrim" data-number="66" data-arabic="التحريم" data-english="at-tahrim" data-verses="12" aria-label="سورة التحريم، 12 آيات">
+                    <span class="card-top"><span class="surah-number">066</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">التحريم</span>
+                    <span class="surah-english" dir="ltr">At-Tahrim</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 12 آية</span>
+                </a>
+                <a class="surah-card" id="67-Al-Mulk" href="#67-Al-Mulk" data-number="67" data-arabic="الملك" data-english="al-mulk" data-verses="30" aria-label="سورة الملك، 30 آيات">
+                    <span class="card-top"><span class="surah-number">067</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الملك</span>
+                    <span class="surah-english" dir="ltr">Al-Mulk</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 30 آية</span>
+                </a>
+                <a class="surah-card" id="68-Al-Qalam" href="#68-Al-Qalam" data-number="68" data-arabic="القلم" data-english="al-qalam" data-verses="52" aria-label="سورة القلم، 52 آيات">
+                    <span class="card-top"><span class="surah-number">068</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">القلم</span>
+                    <span class="surah-english" dir="ltr">Al-Qalam</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 52 آية</span>
+                </a>
+                <a class="surah-card" id="69-Al-Haqqah" href="#69-Al-Haqqah" data-number="69" data-arabic="الحاقة" data-english="al-haqqah" data-verses="52" aria-label="سورة الحاقة، 52 آيات">
+                    <span class="card-top"><span class="surah-number">069</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الحاقة</span>
+                    <span class="surah-english" dir="ltr">Al-Haqqah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 52 آية</span>
+                </a>
+                <a class="surah-card" id="70-Al-Maarij" href="#70-Al-Maarij" data-number="70" data-arabic="المعارج" data-english="al-maarij" data-verses="44" aria-label="سورة المعارج، 44 آيات">
+                    <span class="card-top"><span class="surah-number">070</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المعارج</span>
+                    <span class="surah-english" dir="ltr">Al-Maarij</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 44 آية</span>
+                </a>
+                <a class="surah-card" id="71-Nuh" href="#71-Nuh" data-number="71" data-arabic="نوح" data-english="nuh" data-verses="28" aria-label="سورة نوح، 28 آيات">
+                    <span class="card-top"><span class="surah-number">071</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">نوح</span>
+                    <span class="surah-english" dir="ltr">Nuh</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 28 آية</span>
+                </a>
+                <a class="surah-card" id="72-Al-Jinn" href="#72-Al-Jinn" data-number="72" data-arabic="الجن" data-english="al-jinn" data-verses="28" aria-label="سورة الجن، 28 آيات">
+                    <span class="card-top"><span class="surah-number">072</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الجن</span>
+                    <span class="surah-english" dir="ltr">Al-Jinn</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 28 آية</span>
+                </a>
+                <a class="surah-card" id="73-Al-Muzzammil" href="#73-Al-Muzzammil" data-number="73" data-arabic="المزمل" data-english="al-muzzammil" data-verses="20" aria-label="سورة المزمل، 20 آيات">
+                    <span class="card-top"><span class="surah-number">073</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المزمل</span>
+                    <span class="surah-english" dir="ltr">Al-Muzzammil</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 20 آية</span>
+                </a>
+                <a class="surah-card" id="74-Al-Muddaththir" href="#74-Al-Muddaththir" data-number="74" data-arabic="المدثر" data-english="al-muddaththir" data-verses="56" aria-label="سورة المدثر، 56 آيات">
+                    <span class="card-top"><span class="surah-number">074</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المدثر</span>
+                    <span class="surah-english" dir="ltr">Al-Muddaththir</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 56 آية</span>
+                </a>
+                <a class="surah-card" id="75-Al-Qiyamah" href="#75-Al-Qiyamah" data-number="75" data-arabic="القيامة" data-english="al-qiyamah" data-verses="40" aria-label="سورة القيامة، 40 آيات">
+                    <span class="card-top"><span class="surah-number">075</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">القيامة</span>
+                    <span class="surah-english" dir="ltr">Al-Qiyamah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 40 آية</span>
+                </a>
+                <a class="surah-card" id="76-Al-Insan" href="#76-Al-Insan" data-number="76" data-arabic="الإنسان" data-english="al-insan" data-verses="31" aria-label="سورة الإنسان، 31 آيات">
+                    <span class="card-top"><span class="surah-number">076</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الإنسان</span>
+                    <span class="surah-english" dir="ltr">Al-Insan</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 31 آية</span>
+                </a>
+                <a class="surah-card" id="77-Al-Mursalat" href="#77-Al-Mursalat" data-number="77" data-arabic="المرسلات" data-english="al-mursalat" data-verses="50" aria-label="سورة المرسلات، 50 آيات">
+                    <span class="card-top"><span class="surah-number">077</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المرسلات</span>
+                    <span class="surah-english" dir="ltr">Al-Mursalat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 50 آية</span>
+                </a>
+                <a class="surah-card" id="78-An-Naba" href="#78-An-Naba" data-number="78" data-arabic="النبأ" data-english="an-naba" data-verses="40" aria-label="سورة النبأ، 40 آيات">
+                    <span class="card-top"><span class="surah-number">078</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النبأ</span>
+                    <span class="surah-english" dir="ltr">An-Naba</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 40 آية</span>
+                </a>
+                <a class="surah-card" id="79-An-Naziat" href="#79-An-Naziat" data-number="79" data-arabic="النازعات" data-english="an-naziat" data-verses="46" aria-label="سورة النازعات، 46 آيات">
+                    <span class="card-top"><span class="surah-number">079</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النازعات</span>
+                    <span class="surah-english" dir="ltr">An-Naziat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 46 آية</span>
+                </a>
+                <a class="surah-card" id="80-Abasa" href="#80-Abasa" data-number="80" data-arabic="عبس" data-english="abasa" data-verses="42" aria-label="سورة عبس، 42 آيات">
+                    <span class="card-top"><span class="surah-number">080</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">عبس</span>
+                    <span class="surah-english" dir="ltr">Abasa</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 42 آية</span>
+                </a>
+                <a class="surah-card" id="81-At-Takwir" href="#81-At-Takwir" data-number="81" data-arabic="التكوير" data-english="at-takwir" data-verses="29" aria-label="سورة التكوير، 29 آيات">
+                    <span class="card-top"><span class="surah-number">081</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">التكوير</span>
+                    <span class="surah-english" dir="ltr">At-Takwir</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 29 آية</span>
+                </a>
+                <a class="surah-card" id="82-Al-Infitar" href="#82-Al-Infitar" data-number="82" data-arabic="الانفطار" data-english="al-infitar" data-verses="19" aria-label="سورة الانفطار، 19 آيات">
+                    <span class="card-top"><span class="surah-number">082</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الانفطار</span>
+                    <span class="surah-english" dir="ltr">Al-Infitar</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 19 آية</span>
+                </a>
+                <a class="surah-card" id="83-Al-Mutaffifin" href="#83-Al-Mutaffifin" data-number="83" data-arabic="المطففين" data-english="al-mutaffifin" data-verses="36" aria-label="سورة المطففين، 36 آيات">
+                    <span class="card-top"><span class="surah-number">083</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المطففين</span>
+                    <span class="surah-english" dir="ltr">Al-Mutaffifin</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 36 آية</span>
+                </a>
+                <a class="surah-card" id="84-Al-Inshiqaq" href="#84-Al-Inshiqaq" data-number="84" data-arabic="الانشقاق" data-english="al-inshiqaq" data-verses="25" aria-label="سورة الانشقاق، 25 آيات">
+                    <span class="card-top"><span class="surah-number">084</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الانشقاق</span>
+                    <span class="surah-english" dir="ltr">Al-Inshiqaq</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 25 آية</span>
+                </a>
+                <a class="surah-card" id="85-Al-Buruj" href="#85-Al-Buruj" data-number="85" data-arabic="البروج" data-english="al-buruj" data-verses="22" aria-label="سورة البروج، 22 آيات">
+                    <span class="card-top"><span class="surah-number">085</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">البروج</span>
+                    <span class="surah-english" dir="ltr">Al-Buruj</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 22 آية</span>
+                </a>
+                <a class="surah-card" id="86-At-Tariq" href="#86-At-Tariq" data-number="86" data-arabic="الطارق" data-english="at-tariq" data-verses="17" aria-label="سورة الطارق، 17 آيات">
+                    <span class="card-top"><span class="surah-number">086</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الطارق</span>
+                    <span class="surah-english" dir="ltr">At-Tariq</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 17 آية</span>
+                </a>
+                <a class="surah-card" id="87-Al-Ala" href="#87-Al-Ala" data-number="87" data-arabic="الأعلى" data-english="al-ala" data-verses="19" aria-label="سورة الأعلى، 19 آيات">
+                    <span class="card-top"><span class="surah-number">087</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الأعلى</span>
+                    <span class="surah-english" dir="ltr">Al-Ala</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 19 آية</span>
+                </a>
+                <a class="surah-card" id="88-Al-Ghashiyah" href="#88-Al-Ghashiyah" data-number="88" data-arabic="الغاشية" data-english="al-ghashiyah" data-verses="26" aria-label="سورة الغاشية، 26 آيات">
+                    <span class="card-top"><span class="surah-number">088</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الغاشية</span>
+                    <span class="surah-english" dir="ltr">Al-Ghashiyah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 26 آية</span>
+                </a>
+                <a class="surah-card" id="89-Al-Fajr" href="#89-Al-Fajr" data-number="89" data-arabic="الفجر" data-english="al-fajr" data-verses="30" aria-label="سورة الفجر، 30 آيات">
+                    <span class="card-top"><span class="surah-number">089</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الفجر</span>
+                    <span class="surah-english" dir="ltr">Al-Fajr</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 30 آية</span>
+                </a>
+                <a class="surah-card" id="90-Al-Balad" href="#90-Al-Balad" data-number="90" data-arabic="البلد" data-english="al-balad" data-verses="20" aria-label="سورة البلد، 20 آيات">
+                    <span class="card-top"><span class="surah-number">090</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">البلد</span>
+                    <span class="surah-english" dir="ltr">Al-Balad</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 20 آية</span>
+                </a>
+                <a class="surah-card" id="91-Ash-Shams" href="#91-Ash-Shams" data-number="91" data-arabic="الشمس" data-english="ash-shams" data-verses="15" aria-label="سورة الشمس، 15 آيات">
+                    <span class="card-top"><span class="surah-number">091</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الشمس</span>
+                    <span class="surah-english" dir="ltr">Ash-Shams</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 15 آية</span>
+                </a>
+                <a class="surah-card" id="92-Al-Layl" href="#92-Al-Layl" data-number="92" data-arabic="الليل" data-english="al-layl" data-verses="21" aria-label="سورة الليل، 21 آيات">
+                    <span class="card-top"><span class="surah-number">092</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الليل</span>
+                    <span class="surah-english" dir="ltr">Al-Layl</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 21 آية</span>
+                </a>
+                <a class="surah-card" id="93-Ad-Duha" href="#93-Ad-Duha" data-number="93" data-arabic="الضحى" data-english="ad-duha" data-verses="11" aria-label="سورة الضحى، 11 آيات">
+                    <span class="card-top"><span class="surah-number">093</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الضحى</span>
+                    <span class="surah-english" dir="ltr">Ad-Duha</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 11 آية</span>
+                </a>
+                <a class="surah-card" id="94-Ash-Sharh" href="#94-Ash-Sharh" data-number="94" data-arabic="الشرح" data-english="ash-sharh" data-verses="8" aria-label="سورة الشرح، 8 آيات">
+                    <span class="card-top"><span class="surah-number">094</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الشرح</span>
+                    <span class="surah-english" dir="ltr">Ash-Sharh</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 8 آية</span>
+                </a>
+                <a class="surah-card" id="95-At-Tin" href="#95-At-Tin" data-number="95" data-arabic="التين" data-english="at-tin" data-verses="8" aria-label="سورة التين، 8 آيات">
+                    <span class="card-top"><span class="surah-number">095</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">التين</span>
+                    <span class="surah-english" dir="ltr">At-Tin</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 8 آية</span>
+                </a>
+                <a class="surah-card" id="96-Al-Alaq" href="#96-Al-Alaq" data-number="96" data-arabic="العلق" data-english="al-alaq" data-verses="19" aria-label="سورة العلق، 19 آيات">
+                    <span class="card-top"><span class="surah-number">096</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">العلق</span>
+                    <span class="surah-english" dir="ltr">Al-Alaq</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 19 آية</span>
+                </a>
+                <a class="surah-card" id="97-Al-Qadr" href="#97-Al-Qadr" data-number="97" data-arabic="القدر" data-english="al-qadr" data-verses="5" aria-label="سورة القدر، 5 آيات">
+                    <span class="card-top"><span class="surah-number">097</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">القدر</span>
+                    <span class="surah-english" dir="ltr">Al-Qadr</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 5 آية</span>
+                </a>
+                <a class="surah-card" id="98-Al-Bayyinah" href="#98-Al-Bayyinah" data-number="98" data-arabic="البينة" data-english="al-bayyinah" data-verses="8" aria-label="سورة البينة، 8 آيات">
+                    <span class="card-top"><span class="surah-number">098</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">البينة</span>
+                    <span class="surah-english" dir="ltr">Al-Bayyinah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 8 آية</span>
+                </a>
+                <a class="surah-card" id="99-Az-Zalzalah" href="#99-Az-Zalzalah" data-number="99" data-arabic="الزلزلة" data-english="az-zalzalah" data-verses="8" aria-label="سورة الزلزلة، 8 آيات">
+                    <span class="card-top"><span class="surah-number">099</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الزلزلة</span>
+                    <span class="surah-english" dir="ltr">Az-Zalzalah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 8 آية</span>
+                </a>
+                <a class="surah-card" id="100-Al-Adiyat" href="#100-Al-Adiyat" data-number="100" data-arabic="العاديات" data-english="al-adiyat" data-verses="11" aria-label="سورة العاديات، 11 آيات">
+                    <span class="card-top"><span class="surah-number">100</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">العاديات</span>
+                    <span class="surah-english" dir="ltr">Al-Adiyat</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 11 آية</span>
+                </a>
+                <a class="surah-card" id="101-Al-Qariah" href="#101-Al-Qariah" data-number="101" data-arabic="القارعة" data-english="al-qariah" data-verses="11" aria-label="سورة القارعة، 11 آيات">
+                    <span class="card-top"><span class="surah-number">101</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">القارعة</span>
+                    <span class="surah-english" dir="ltr">Al-Qariah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 11 آية</span>
+                </a>
+                <a class="surah-card" id="102-At-Takathur" href="#102-At-Takathur" data-number="102" data-arabic="التكاثر" data-english="at-takathur" data-verses="8" aria-label="سورة التكاثر، 8 آيات">
+                    <span class="card-top"><span class="surah-number">102</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">التكاثر</span>
+                    <span class="surah-english" dir="ltr">At-Takathur</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 8 آية</span>
+                </a>
+                <a class="surah-card" id="103-Al-Asr" href="#103-Al-Asr" data-number="103" data-arabic="العصر" data-english="al-asr" data-verses="3" aria-label="سورة العصر، 3 آيات">
+                    <span class="card-top"><span class="surah-number">103</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">العصر</span>
+                    <span class="surah-english" dir="ltr">Al-Asr</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 3 آية</span>
+                </a>
+                <a class="surah-card" id="104-Al-Humazah" href="#104-Al-Humazah" data-number="104" data-arabic="الهمزة" data-english="al-humazah" data-verses="9" aria-label="سورة الهمزة، 9 آيات">
+                    <span class="card-top"><span class="surah-number">104</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الهمزة</span>
+                    <span class="surah-english" dir="ltr">Al-Humazah</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 9 آية</span>
+                </a>
+                <a class="surah-card" id="105-Al-Fil" href="#105-Al-Fil" data-number="105" data-arabic="الفيل" data-english="al-fil" data-verses="5" aria-label="سورة الفيل، 5 آيات">
+                    <span class="card-top"><span class="surah-number">105</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الفيل</span>
+                    <span class="surah-english" dir="ltr">Al-Fil</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 5 آية</span>
+                </a>
+                <a class="surah-card" id="106-Quraysh" href="#106-Quraysh" data-number="106" data-arabic="قريش" data-english="quraysh" data-verses="4" aria-label="سورة قريش، 4 آيات">
+                    <span class="card-top"><span class="surah-number">106</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">قريش</span>
+                    <span class="surah-english" dir="ltr">Quraysh</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 4 آية</span>
+                </a>
+                <a class="surah-card" id="107-Al-Maun" href="#107-Al-Maun" data-number="107" data-arabic="الماعون" data-english="al-maun" data-verses="7" aria-label="سورة الماعون، 7 آيات">
+                    <span class="card-top"><span class="surah-number">107</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الماعون</span>
+                    <span class="surah-english" dir="ltr">Al-Maun</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 7 آية</span>
+                </a>
+                <a class="surah-card" id="108-Al-Kawthar" href="#108-Al-Kawthar" data-number="108" data-arabic="الكوثر" data-english="al-kawthar" data-verses="3" aria-label="سورة الكوثر، 3 آيات">
+                    <span class="card-top"><span class="surah-number">108</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الكوثر</span>
+                    <span class="surah-english" dir="ltr">Al-Kawthar</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 3 آية</span>
+                </a>
+                <a class="surah-card" id="109-Al-Kafirun" href="#109-Al-Kafirun" data-number="109" data-arabic="الكافرون" data-english="al-kafirun" data-verses="6" aria-label="سورة الكافرون، 6 آيات">
+                    <span class="card-top"><span class="surah-number">109</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الكافرون</span>
+                    <span class="surah-english" dir="ltr">Al-Kafirun</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 6 آية</span>
+                </a>
+                <a class="surah-card" id="110-An-Nasr" href="#110-An-Nasr" data-number="110" data-arabic="النصر" data-english="an-nasr" data-verses="3" aria-label="سورة النصر، 3 آيات">
+                    <span class="card-top"><span class="surah-number">110</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">النصر</span>
+                    <span class="surah-english" dir="ltr">An-Nasr</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 3 آية</span>
+                </a>
+                <a class="surah-card" id="111-Al-Masad" href="#111-Al-Masad" data-number="111" data-arabic="المسد" data-english="al-masad" data-verses="5" aria-label="سورة المسد، 5 آيات">
+                    <span class="card-top"><span class="surah-number">111</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">المسد</span>
+                    <span class="surah-english" dir="ltr">Al-Masad</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 5 آية</span>
+                </a>
+                <a class="surah-card" id="112-Al-Ikhlas" href="#112-Al-Ikhlas" data-number="112" data-arabic="الإخلاص" data-english="al-ikhlas" data-verses="4" aria-label="سورة الإخلاص، 4 آيات">
+                    <span class="card-top"><span class="surah-number">112</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الإخلاص</span>
+                    <span class="surah-english" dir="ltr">Al-Ikhlas</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 4 آية</span>
+                </a>
+                <a class="surah-card" id="113-Al-Falaq" href="#113-Al-Falaq" data-number="113" data-arabic="الفلق" data-english="al-falaq" data-verses="5" aria-label="سورة الفلق، 5 آيات">
+                    <span class="card-top"><span class="surah-number">113</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الفلق</span>
+                    <span class="surah-english" dir="ltr">Al-Falaq</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 5 آية</span>
+                </a>
+                <a class="surah-card" id="114-An-Nas" href="#114-An-Nas" data-number="114" data-arabic="الناس" data-english="an-nas" data-verses="6" aria-label="سورة الناس، 6 آيات">
+                    <span class="card-top"><span class="surah-number">114</span><span class="card-mark" aria-hidden="true">۞</span></span>
+                    <span class="surah-arabic" lang="ar">الناس</span>
+                    <span class="surah-english" dir="ltr">An-Nas</span>
+                    <span class="verse-count"><span class="verse-icon" aria-hidden="true">✦</span> 6 آية</span>
+                </a>
+            </section>
+        </main>
+        <footer>صُممت بعناية ومحبة <span>للقرآن الكريم</span> · اضغط على أي بطاقة لفتح رابطها الداخلي.</footer>
+        <script>
+                    const searchInput = document.getElementById('search');
+                    const allCards = Array.from(document.querySelectorAll('.surah-card'));
+                    const resultCount = document.getElementById('result-count');
+                    const arabicDigits = value => value.replace(/[٠-٩]/g, digit => '٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+                    searchInput.addEventListener('input', () => {
+                        const raw = searchInput.value.trim().toLocaleLowerCase();
+                        const query = arabicDigits(raw);
+                        let visible = 0;
+                        allCards.forEach(card => {
+                            const searchable = `${card.dataset.arabic} ${card.dataset.english} ${card.dataset.number} ${card.dataset.verses}`.toLocaleLowerCase();
+                            const matches = !query || searchable.includes(query);
+                            card.hidden = !matches;
+                            if (matches) visible++;
+                        });
+                        resultCount.textContent = query ? `عدد النتائج: ${visible} من ١١٤ سورة` : 'جميع السور الـ ١١٤';
+                    });
+        </script>
+    </body>
+</html>
+
+
+
+
+    <audio id="audio" preload="auto"></audio>
+    <div class="ac-toast" id="toast" role="status" aria-live="polite"></div>
+</div>

@@ -1,0 +1,454 @@
+.ac-app {
+    --ac-paper: #a5222247;
+}
+
+@media (prefers-color-scheme: dark) {
+    .ac-app {
+        --ac-paper: #a5222247;
+    }
+}
+
+img {
+    border-radius: 100%;
+}
+
+.sf-arrows .sf-with-ul:after {
+    content: "✔";
+}
+
+@media (max-width: 768px) {
+    .link-nav {
+        display: none !important;
+    }
+
+    .mt-20 {
+        display: none !important;
+    }
+}
+
+
+
+/* === تنسيقات مشتركة === */
+body {
+    transition: background-color 0.5s ease, color 0.5s ease !important;
+}
+
+.simple-dark-mode,
+.golden-mode,
+.green-mode {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button[onclick*="toggleTheme"]:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+
+button[onclick*="toggleTheme"]:active {
+    transform: scale(0.95);
+}
+
+button[onclick*="toggleTheme"]:focus,
+button[onclick*="toggleTheme"] {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* === الوضع الداكن === */
+.simple-dark-mode {
+    background-color: #121212 !important;
+    color: #e0e0e0 !important;
+}
+
+    .simple-dark-mode *:not(header#header#home):not(section.banner-area.relative#home *):not(header#header#home *):not(a):not(b):not(strong):not(i):not(em):not(span):not(label):not(mark):not(small):not(sub):not(sup):not(u):not(ins):not(del):not(code):not(font):not(samp):not(var) {
+        color: #e0e0e0 !important;
+        background-color: transparent;
+    }
+
+    .simple-dark-mode section.banner-area.relative#home,
+    .simple-dark-mode header#header#home {
+        background-color: inherit !important;
+        color: inherit !important;
+    }
+
+    .simple-dark-mode #mobile-nav {
+        background: rgb(0 0 0 / 92%) !important;
+    }
+
+    .simple-dark-mode #header.header-scrolled {
+        background-color: rgb(0 0 0 / 90%) !important;
+    }
+
+    .simple-dark-mode .banner-area .overlay-bg {
+        background-color: rgb(0 0 0 / 89%) !important;
+    }
+
+    .simple-dark-mode a {
+        color: #ffcc80 !important;
+    }
+
+    .simple-dark-mode tr:nth-child(even),
+    .simple-dark-mode .cta-one-area .overlay-bg,
+    .simple-dark-mode .popular-title,
+    .simple-dark-mode .category-title,
+    .simple-dark-mode .tagcloud-title,
+    .simple-dark-mode .hadith,
+    .simple-dark-mode .widget-wrap,
+    .simple-dark-mode form.search-form button,
+    .simple-dark-mode form.search-form input[type=text],
+    .simple-dark-mode .card-header,
+    .simple-dark-mode .genric-btn.default-border,
+    .simple-dark-mode .hadith-blockquote,
+    .simple-dark-mode blockquote,
+    .simple-dark-mode .bg-overlay::after,
+    .simple-dark-mode .hadith-card,
+    .simple-dark-mode .card {
+        background: #1e1e1e !important;
+    }
+
+    .simple-dark-mode .bg-overlay::after,
+    .simple-dark-mode .hadith-card,
+    .simple-dark-mode .card {
+        border: 1px solid rgb(224 224 224);
+        box-shadow: 0 0 20px rgb(255 204 117 / 25%) !important;
+    }
+
+    .simple-dark-mode .button,
+    .simple-dark-mode table {
+        box-shadow: 0 0 20px rgb(255 204 117 / 25%) !important;
+    }
+
+    .simple-dark-mode hr {
+        border-top: 1px solid rgb(255 204 100);
+    }
+
+    .simple-dark-mode b,
+    .simple-dark-mode strong {
+        color: #f7d78b !important;
+    }
+
+    .simple-dark-mode label {
+        color: #48af83 !important;
+    }
+
+    .simple-dark-mode .nav-menu ul li a {
+        background: #2a2a2a !important;
+        color: #ffcc80 !important;
+    }
+
+/* === الوضع الذهبي === */
+.golden-mode {
+    background: linear-gradient(135deg, rgba(250, 241, 227, 1) 0%, rgb(245, 228, 198) 100%) !important;
+    color: #3f0000 !important;
+}
+
+    .golden-mode *:not(header#header#home):not(section.banner-area.relative#home *):not(header#header#home *):not(a):not(b):not(strong):not(i):not(em):not(span):not(label):not(mark):not(small):not(sub):not(sup):not(u):not(ins):not(del):not(code):not(font):not(samp):not(var) {
+        color: #3f0000 !important;
+        background-color: transparent;
+    }
+
+    .golden-mode section.banner-area.relative#home,
+    .golden-mode header#header#home {
+        background: linear-gradient(135deg, #4a1c19 0%, #2c100e 100%) !important;
+        color: #f5e3c5 !important;
+    }
+
+    .golden-mode #mobile-nav,
+    .golden-mode #header.header-scrolled {
+        background: linear-gradient(135deg, #4a1c19, #2c100e) !important;
+    }
+
+    .golden-mode .banner-area .overlay-bg {
+        background: linear-gradient(135deg, rgba(74, 28, 25, 0.9), rgba(44, 16, 14, 0.9)) !important;
+    }
+
+    .golden-mode a:not(header a):not(nav a):not(.banner-area a):not(.overlay-bg a) {
+        color: #8b4513 !important;
+    }
+
+    .golden-mode .nav-menu ul li a {
+        background: #f0e6d6 !important;
+        color: #5a2a27 !important;
+    }
+
+    .golden-mode tr:nth-child(even),
+    .golden-mode .cta-one-area .overlay-bg,
+    .golden-mode .popular-title,
+    .golden-mode .category-title,
+    .golden-mode .tagcloud-title,
+    .golden-mode .hadith,
+    .golden-mode .widget-wrap,
+    .golden-mode form.search-form button,
+    .golden-mode form.search-form input[type=text],
+    .golden-mode .card-header,
+    .golden-mode .genric-btn.default-border,
+    .golden-mode .hadith-blockquote,
+    .golden-mode blockquote,
+    .golden-mode .bg-overlay::after,
+    .golden-mode .hadith-card,
+    .golden-mode .card {
+        background: #f0e6d6 !important;
+    }
+
+    .golden-mode .bg-overlay::after,
+    .golden-mode .hadith-card,
+    .golden-mode .card {
+        border: 1px solid #8b4513;
+        box-shadow: 0 0 20px rgb(139 69 19 / 25%) !important;
+    }
+
+    .golden-mode .button,
+    .golden-mode table {
+        box-shadow: 0 0 20px rgb(139 69 19 / 25%) !important;
+    }
+
+    .golden-mode hr {
+        border-top: 1px solid #8b4513;
+    }
+
+    .golden-mode b,
+    .golden-mode strong {
+        color: #7f0000 !important;
+    }
+
+    .golden-mode label {
+        color: #8b4513 !important;
+    }
+
+/* === الوضع الأخضر === */
+.green-mode {
+    background: linear-gradient(135deg, #f8fff8 0%, #f0f9f0 100%) !important;
+    color: #1a472a !important;
+}
+
+    .green-mode *:not(header#header#home):not(section.banner-area.relative#home *):not(header#header#home *):not(a):not(b):not(strong):not(i):not(em):not(span):not(label):not(.cta-one-area .overlay-bg):not(small):not(sub):not(sup):not(u):not(ins):not(del):not(code):not(font):not(samp):not(var) {
+        color: #1a472a;
+        background-color: transparent;
+    }
+
+    .green-mode section.banner-area.relative#home,
+    .green-mode header#header#home {
+        background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%) !important;
+        color: #e8f5e9 !important;
+    }
+
+    .green-mode #mobile-nav,
+    .green-mode #header.header-scrolled {
+        background: linear-gradient(135deg, #1a472a, #2d5a3d) !important;
+    }
+
+    .green-mode .banner-area .overlay-bg {
+        background: linear-gradient(135deg, rgba(26, 71, 42, 0.9), rgba(45, 90, 61, 0.9)) !important;
+    }
+
+    .green-mode a:not(header a):not(nav a):not(.banner-area a):not(.single-footer-widget a):not(.overlay-bg a) {
+        color: #2e7d32 !important;
+    }
+
+    .green-mode .nav-menu ul li a {
+        background: #e8f5e9 !important;
+        color: #1a472a !important;
+    }
+
+    .green-mode tr:nth-child(even),
+    .green-mode .popular-title,
+    .green-mode .category-title,
+    .green-mode .tagcloud-title,
+    .green-mode .hadith,
+    .green-mode .widget-wrap,
+    .green-mode .card-header,
+    .green-mode .genric-btn.default-border,
+    .green-mode .hadith-blockquote,
+    .green-mode blockquote {
+        background: #e8f5e9 !important;
+    }
+
+    .green-mode form.search-form button,
+    .green-mode form.search-form input[type=text] {
+        background: linear-gradient(135deg, #1a472a, #2d5a3d) !important;
+        color: #ffffff !important;
+    }
+
+    .green-mode .bg-overlay::after,
+    .green-mode .hadith-card,
+    .green-mode .card {
+        background: rgb(241 249 242 / 90%) !important;
+        border: 1px solid #2e7d3238 !important;
+        box-shadow: 0 6px 15px rgba(46, 125, 50, 0.25) !important;
+    }
+
+    .green-mode .button,
+    .green-mode table {
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2) !important;
+    }
+
+    .green-mode hr {
+        border-top: 2px solid #2e7d32;
+    }
+
+    .green-mode b,
+    .green-mode strong {
+        color: #00862f !important;
+    }
+
+    .green-mode label {
+        color: #2e7d32 !important;
+    }
+
+    /* === فوتر أخضر === */
+    .green-mode footer {
+        background: linear-gradient(135deg, #0a1d11 0%, #2d5a3d 100%) !important;
+        color: #e8f5e9 !important;
+    }
+
+        .green-mode footer * {
+            color: #e8f5e9 !important;
+            background: transparent !important;
+        }
+
+        .green-mode footer a {
+            color: #a7d7c5 !important;
+        }
+
+            .green-mode footer a:hover {
+                color: #ffffff !important;
+            }
+
+/* === تنسيقات الصور === */
+.simple-dark-mode img[src*="basmalah.png"],
+.simple-dark-mode img[src*="ajzaa_names/"],
+.simple-dark-mode img[src*="pages-quran/"],
+.simple-dark-mode img[src*="1.png"],
+.simple-dark-mode img[alt="بسم الله الرحمن الرحيم"] {
+    filter: invert(1) !important;
+}
+
+.golden-mode img[src*="basmalah.png"],
+.golden-mode img[src*="ajzaa_names/"],
+.golden-mode img[src*="1.png"],
+.golden-mode img[alt="بسم الله الرحمن الرحيم"] {
+    filter: sepia(0.3) brightness(1.05) !important;
+}
+
+.green-mode img[src*="basmalah.png"],
+.green-mode img[src*="ajzaa_names/"],
+.green-mode img[src*="pages-quran/"],
+.green-mode img[src*="1.png"],
+.green-mode img[alt="بسم الله الرحمن الرحيم"] {
+    filter: hue-rotate(90deg) brightness(1.05) !important;
+}
+
+/* === ألوان النصوص الخاصة === */
+.simple-dark-mode [style*="blue"],
+.simple-dark-mode [color="#000080"],
+.simple-dark-mode [color="blue"],
+.simple-dark-mode [color="darkblue"],
+.simple-dark-mode [style="font-weight: bold;color: blue;"] {
+    color: #87ceeb !important;
+}
+
+.simple-dark-mode [style*="red"],
+.simple-dark-mode [color="red"],
+.simple-dark-mode [color="#800000"],
+.simple-dark-mode [color="crimson"],
+.simple-dark-mode [style="color: brown"],
+.simple-dark-mode [color="firebrick"] {
+    color: #f7d78b !important;
+}
+
+.simple-dark-mode [style*="green"],
+.simple-dark-mode [color="green"],
+.simple-dark-mode [style="color: darkgreen"] {
+    color: #90ee90 !important;
+}
+
+.golden-mode [style*="blue"],
+.golden-mode [color="blue"],
+.golden-mode [color="darkblue"],
+.golden-mode [style*="red"],
+.golden-mode [color="red"],
+.golden-mode [color="crimson"] {
+    color: #8b4513 !important;
+}
+
+.green-mode [style*="blue"],
+.green-mode [color="blue"],
+.green-mode [color="darkblue"] {
+    color: #2196f3 !important;
+}
+
+.green-mode [style*="red"],
+.green-mode [color="red"],
+.green-mode [color="crimson"] {
+    color: #f44336 !important;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    70% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+}
+
+@keyframes bubble-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    [aria-label="روابط قنواتنا على وسائل التواصل"] {
+        bottom: 14px;
+        left: 14px;
+    }
+
+        [aria-label="روابط قنواتنا على وسائل التواصل"] button {
+            width: 50px;
+            height: 50px;
+        }
+}
+
+/*القرءان مصحف بداية*/
+
+::selection {
+    background-color: #F5F5DC !important;
+    color: #808000e0 !important;
+}
+
+b {
+    font-weight: 550 !important;
+    color: #8b2413 !important;
+}
+
+b::selection,
+strong::selection {
+    color: #8b2413 !important;
+}
+
+    .ac-app {
+        --ac-paper: #808000e0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .ac-app {
+            --ac-paper: #808000e0;
+        }
+    }
+    /*القرءان مصحف نهاية*/
