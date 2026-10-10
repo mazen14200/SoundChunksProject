@@ -19,21 +19,21 @@
                 </div>
             </div>
 
-            @if (!string.IsNullOrEmpty(Model.AudioFilePath))
-            {
-                <div class="audio-player">
-                    <audio controls preload="auto">
-                        <source src="@Model.AudioFilePath" type="audio/mpeg">
-                        متصفحك لا يدعم تشغيل الصوت.
-                    </audio>
-                </div>
-            }
-            else
-            {
-                <div class="no-audio-warning">
-                    <p>⚠️ لم يُضف الملف الصوتي لهذه السورة بعد</p>
-                </div>
-            }
+        @if (!string.IsNullOrEmpty(Model.AudioFilePath))
+        {
+            <div class="audio-player">
+                <audio controls preload="auto">
+                    <source src="@Model.AudioFilePath" type="audio/mpeg">
+                    متصفحك لا يدعم تشغيل الصوت.
+                </audio>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.Sheikh))
+        {
+            <div class="no-audio-warning">
+                <p>⚠️ لم يُضف الملف الصوتي لهذه السورة بعد</p>
+            </div>
+        }
         }
         else
         {

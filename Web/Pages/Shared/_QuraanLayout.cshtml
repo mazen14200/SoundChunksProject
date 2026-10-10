@@ -13,6 +13,59 @@
     <link id="theme-css" rel="stylesheet" href="~/css/Quraan1.css" />
     <link rel="stylesheet" href="~/css/quraan-player.css" />
 
+    @using SoundChunksWeb.Services
+    @using System.Linq
+    @inject PersonService PersonService
+
+    @{
+        // Extract sheikh info from QueryString
+        string? sheikhId = Context.Request.Query["sheikhId"];
+        string? sheikhName = Context.Request.Query["sheikh"];
+        string? sheikhDescription = Context.Request.Query["sheikhDescription"];
+        string? sheikhImage = Context.Request.Query["sheikhImage"];
+
+        // If sheikhId exists but name/image/description are missing, get from PersonService
+        if (!string.IsNullOrEmpty(sheikhId) && (string.IsNullOrEmpty(sheikhName) || string.IsNullOrEmpty(sheikhImage) || string.IsNullOrEmpty(sheikhDescription)))
+        {
+            var person = PersonService.GetAllPersons().FirstOrDefault(p => p.Id == sheikhId);
+            if (person != null)
+            {
+                if (string.IsNullOrEmpty(sheikhName))
+                {
+                    sheikhName = person.Name;
+                }
+                if (string.IsNullOrEmpty(sheikhImage))
+                {
+                    sheikhImage = person.ImagePath;
+                }
+                if (string.IsNullOrEmpty(sheikhDescription))
+                {
+                    sheikhDescription = person.Description;
+                }
+            }
+        }
+
+        // Decode URL-encoded values
+        if (!string.IsNullOrEmpty(sheikhName))
+        {
+            sheikhName = System.Net.WebUtility.UrlDecode(sheikhName);
+        }
+        if (!string.IsNullOrEmpty(sheikhDescription))
+        {
+            sheikhDescription = System.Net.WebUtility.UrlDecode(sheikhDescription);
+        }
+        if (!string.IsNullOrEmpty(sheikhImage))
+        {
+            sheikhImage = System.Net.WebUtility.UrlDecode(sheikhImage);
+        }
+
+        // Store in ViewData for use in the body
+        ViewData["SheikhId"] = sheikhId;
+        ViewData["SheikhName"] = sheikhName;
+        ViewData["SheikhDescription"] = sheikhDescription;
+        ViewData["SheikhImage"] = sheikhImage;
+    }
+
     <style>
             /* Navbar Styles */
             .quraan-navbar {
@@ -91,7 +144,7 @@
                 flex-direction: column;
                 gap: 15px;
                 max-height: calc(100vh - 120px);
-                overflow-y: auto;
+                /* overflow-y: auto; */
                 padding-right: 5px;
             }
 
@@ -118,6 +171,12 @@
                 transition: all 0.3s ease;
                 cursor: pointer;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .sheikh-card-full-width {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-bottom: 20px;
             }
 
                 .person-card:hover {
@@ -150,7 +209,7 @@
             }
 
             .person-description {
-                font-size: 0.85rem;
+                font-size: 1.05rem;
                 line-height: 1.4;
                 color: rgba(255,255,255,0.9);
                 display: -webkit-box;
@@ -262,13 +321,32 @@
 
     <!-- Main Content -->
     <div class="main-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            @await Component.InvokeAsync("PersonSidebar")
-        </aside>
+        <!-- Sidebar - Only show on Fehrs page -->
+        @if (ViewData["ShowSidebar"] as bool? == true)
+        {
+            <aside class="sidebar">
+                @await Component.InvokeAsync("PersonSidebar")
+            </aside>
+        }
 
         <!-- Content Area -->
-        <div class="content-area">
+        <div class="content-area" style="@(ViewData["ShowSidebar"] as bool? == true ? "" : "width: 100%;")">
+            <!-- Sheikh Card - Show above ac-app when SheikhId exists in route -->
+            @if (!string.IsNullOrEmpty(ViewData["SheikhId"] as string))
+            {
+                var sheikhName = ViewData["SheikhName"] as string;
+                var sheikhImage = ViewData["SheikhImage"] as string;
+                var sheikhDescription = ViewData["SheikhDescription"] as string;
+                <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; margin-bottom: 20px;">
+                    <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
+                    <div class="person-info">
+                        <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
+                        <div class="person-name" style="margin-top:0px;line-height: 1.5;" >@sheikhName</div>
+                        <div class="person-description">@sheikhDescription</div>
+                    </div>
+                </div>
+            }
+
             @RenderBody()
         </div>
     </div>
