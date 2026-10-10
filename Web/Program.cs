@@ -33,6 +33,9 @@ builder.Services.AddSingleton<IWaveformService, WaveformService>();
 builder.Services.AddSingleton<IQuranAudioService, QuranAudioService>();
 builder.Services.AddSingleton<PersonService>();
 
+// Register background services
+builder.Services.AddHostedService<QuranCacheCleanupService>();
+
 // Add CORS for file access
 builder.Services.AddCors(options =>
 {

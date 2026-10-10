@@ -18,4 +18,7 @@ public interface IQuranAudioService
 
     /// <summary>Physical path of a merged file from its token (throws <see cref="QuranAudioException"/> when missing).</summary>
     string GetMergedFilePath(string token);
+
+    /// <summary>Removes old cache files that have not been used for CacheMaxAge.</summary>
+    void TrimCache();
 }

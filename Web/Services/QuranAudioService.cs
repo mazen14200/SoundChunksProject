@@ -31,7 +31,7 @@ public class QuranAudioService : IQuranAudioService
     private const int CacheVersion = 1;
     private const int MaxRange = 1000;
     private static readonly TimeSpan ToolTimeout = TimeSpan.FromMinutes(20);
-    private static readonly TimeSpan CacheMaxAge = TimeSpan.FromDays(14);
+    private static readonly TimeSpan CacheMaxAge = TimeSpan.FromDays(2);
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> Locks = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, double> DurationCache = new(StringComparer.OrdinalIgnoreCase);
@@ -150,6 +150,7 @@ public class QuranAudioService : IQuranAudioService
             };
 
             WriteJsonAtomically(cachePath, data);
+            TrimCache();
             return data;
         }
         finally
@@ -660,7 +661,7 @@ public class QuranAudioService : IQuranAudioService
     }
 
     // removes merged files and peaks that have not been used for CacheMaxAge
-    private void TrimCache()
+    public void TrimCache()
     {
         try
         {
