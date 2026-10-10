@@ -1,0 +1,555 @@
+/*
+ * Quraan ayah player.
+ * Everything uses the qp- prefix. The site themes (Quraan1.css / Quraan2.css and the
+ * .simple-dark-mode / .golden-mode / .green-mode rules) force colour and a transparent background on
+ * most elements, so backgrounds here use !important and all visible text sits in <span>s,
+ * which those theme rules deliberately skip.
+ */
+
+/* ---------- the ayat inside the page text ---------- */
+
+.qp-ayah {
+    cursor: pointer;
+    border-radius: 0.3em;
+    transition: background-color 0.15s;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+@media (hover: hover) {
+    .qp-ayah:hover {
+        background-color: rgba(255, 214, 102, 0.5) !important;
+    }
+}
+
+.qp-ayah.qp-sel {
+    background-color: rgba(255, 214, 102, 0.62) !important;
+}
+
+.qp-ayah.qp-now {
+    background-color: rgba(255, 170, 0, 0.72) !important;
+}
+
+.qp-ayah.qp-noaudio {
+    cursor: not-allowed;
+}
+
+.qp-ayah:focus-visible {
+    outline: 2px solid #0d6e6a;
+    outline-offset: 2px;
+}
+
+/* ---------- panels ---------- */
+
+.qp-panel {
+    --qp-panel: rgba(255, 255, 255, 0.96);
+    --qp-btnbg: #ffffff;
+    --qp-inputbg: #ffffff;
+    --qp-overlay: rgba(255, 255, 255, 0.78);
+    --qp-ink: #1d2a2a;
+    --qp-muted: #566666;
+    --qp-line: rgba(0, 0, 0, 0.16);
+    --qp-accent: #0d6e6a;
+    --qp-accent-ink: #ffffff;
+    --qp-played: #0d6e6a;
+    --qp-rest: #9fb0ae;
+    --qp-silence: #c1cccb;
+    --qp-playhead: #1d2a2a;
+    --qp-ruler: #8a9a98;
+    --qp-ruler-text: #51615f;
+    --qp-seg: rgba(13, 110, 106, 0.38);
+    --qp-danger: #b3261e;
+
+    direction: rtl;
+    text-align: right;
+    font-family: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--qp-ink);
+    background: var(--qp-panel) !important;
+    border: 1px solid var(--qp-line);
+    border-radius: 12px;
+    padding: 0.7rem 0.85rem;
+}
+
+.qp-panel *,
+.qp-panel *::before,
+.qp-panel *::after {
+    box-sizing: border-box;
+}
+
+.simple-dark-mode .qp-panel {
+    --qp-panel: rgba(27, 35, 34, 0.97);
+    --qp-btnbg: #26332f;
+    --qp-inputbg: #1e2827;
+    --qp-overlay: rgba(27, 35, 34, 0.8);
+    --qp-ink: #e4ecea;
+    --qp-muted: #9db0ad;
+    --qp-line: rgba(255, 255, 255, 0.18);
+    --qp-accent: #3cc7bd;
+    --qp-accent-ink: #04201e;
+    --qp-played: #3cc7bd;
+    --qp-rest: #566966;
+    --qp-silence: #3b4a48;
+    --qp-playhead: #e4ecea;
+    --qp-ruler: #5d706d;
+    --qp-ruler-text: #9db0ad;
+    --qp-seg: rgba(60, 199, 189, 0.4);
+    --qp-danger: #ff8a80;
+}
+
+.golden-mode .qp-panel {
+    --qp-panel: rgba(247, 237, 219, 0.97);
+    --qp-btnbg: #fff8ea;
+    --qp-inputbg: #fff8ea;
+    --qp-overlay: rgba(247, 237, 219, 0.82);
+    --qp-ink: #3f0000;
+    --qp-muted: #7a4a3a;
+    --qp-line: rgba(139, 69, 19, 0.4);
+    --qp-accent: #8b4513;
+    --qp-accent-ink: #fff7e8;
+    --qp-played: #8b4513;
+    --qp-rest: #c9ae88;
+    --qp-silence: #dcc9a8;
+    --qp-playhead: #3f0000;
+    --qp-ruler: #b79b72;
+    --qp-ruler-text: #7a4a3a;
+    --qp-seg: rgba(139, 69, 19, 0.4);
+}
+
+.green-mode .qp-panel {
+    --qp-panel: rgba(241, 249, 242, 0.97);
+    --qp-btnbg: #ffffff;
+    --qp-inputbg: #ffffff;
+    --qp-overlay: rgba(241, 249, 242, 0.82);
+    --qp-ink: #1a472a;
+    --qp-muted: #4f7a5c;
+    --qp-line: rgba(46, 125, 50, 0.35);
+    --qp-accent: #2e7d32;
+    --qp-accent-ink: #ffffff;
+    --qp-played: #2e7d32;
+    --qp-rest: #a5c4a8;
+    --qp-silence: #c5dac7;
+    --qp-playhead: #1a472a;
+    --qp-ruler: #86a98b;
+    --qp-ruler-text: #4f7a5c;
+    --qp-seg: rgba(46, 125, 50, 0.4);
+}
+
+.qp-top {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    margin: 0 0 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+}
+
+.qp-bottom {
+    margin: 1.75rem 0 0;
+}
+
+.qp-title {
+    display: block;
+    margin: 0 0 0.55rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--qp-ink);
+}
+
+/* ---------- top bar: range fields ---------- */
+
+.qp-top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.6rem;
+    margin-bottom: 0.55rem;
+}
+
+.qp-field-label {
+    color: var(--qp-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.qp-num {
+    width: 4.6rem;
+    height: 36px;
+    padding: 0 0.4rem;
+    direction: ltr;
+    text-align: center;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--qp-line);
+    border-radius: 8px;
+    background: var(--qp-inputbg) !important;
+}
+
+.qp-num:disabled {
+    opacity: 0.5;
+}
+
+.qp-status {
+    flex: 1 1 12rem;
+    min-width: 0;
+    color: var(--qp-muted);
+    font-size: 0.88rem;
+}
+
+.qp-status.is-error {
+    color: var(--qp-danger);
+}
+
+/* ---------- buttons ---------- */
+
+.qp-btn {
+    min-height: 36px;
+    padding: 0 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: inherit;
+    font-weight: 600;
+    color: var(--qp-ink);
+    background: var(--qp-btnbg) !important;
+    border: 1px solid var(--qp-line);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.12s;
+}
+
+.qp-btn span {
+    color: var(--qp-ink);
+}
+
+.qp-btn:hover:not(:disabled) {
+    border-color: var(--qp-accent);
+}
+
+.qp-btn:focus-visible,
+.qp-chip:focus-visible,
+.qp-seek:focus-visible,
+.qp-num:focus-visible {
+    outline: 2px solid var(--qp-accent);
+    outline-offset: 2px;
+}
+
+.qp-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.qp-btn-primary {
+    background: var(--qp-accent) !important;
+    border-color: var(--qp-accent);
+}
+
+.qp-btn-primary span {
+    color: var(--qp-accent-ink);
+}
+
+.qp-btn[aria-pressed="true"] {
+    background: var(--qp-accent) !important;
+    border-color: var(--qp-accent);
+}
+
+.qp-btn[aria-pressed="true"] span {
+    color: var(--qp-accent-ink);
+}
+
+.qp-btn-quiet {
+    font-weight: 500;
+}
+
+/* ---------- waveform ---------- */
+
+.qp-wave {
+    direction: ltr;
+}
+
+.qp-wave-frame {
+    position: relative;
+    border: 1px solid var(--qp-line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--qp-inputbg) !important;
+}
+
+.qp-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+    outline: none;
+}
+
+.qp-top .qp-viewport {
+    height: 96px;
+}
+
+.qp-bottom .qp-viewport {
+    height: 170px;
+}
+
+.qp-inner {
+    position: relative;
+    height: 100%;
+    min-width: 100%;
+}
+
+.qp-canvas {
+    position: sticky;
+    left: 0;
+    display: block;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.qp-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    direction: rtl;
+    pointer-events: none;
+    background: var(--qp-overlay) !important;
+}
+
+.qp-overlay span {
+    color: var(--qp-muted);
+    font-size: 0.92rem;
+}
+
+.qp-overlay.is-hidden {
+    display: none;
+}
+
+/* ---------- rows: transport, seek, speed ---------- */
+
+.qp-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.55rem;
+    margin-top: 0.6rem;
+}
+
+.qp-transport {
+    direction: ltr;
+    justify-content: space-between;
+}
+
+.qp-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.qp-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    direction: ltr;
+}
+
+.qp-time span {
+    color: var(--qp-ink);
+}
+
+.qp-time .qp-time-total {
+    color: var(--qp-muted);
+    font-weight: 500;
+}
+
+.qp-seek {
+    --p: 0%;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    direction: ltr;
+    background: transparent !important;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.qp-seek:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.qp-seek::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--qp-accent) var(--p), var(--qp-line) var(--p));
+}
+
+.qp-seek::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--qp-line);
+}
+
+.qp-seek::-moz-range-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--qp-accent);
+}
+
+.qp-seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--qp-btnbg);
+    background: var(--qp-accent);
+    box-shadow: 0 0 0 1px var(--qp-accent);
+}
+
+.qp-seek::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--qp-btnbg);
+    background: var(--qp-accent);
+    box-shadow: 0 0 0 1px var(--qp-accent);
+}
+
+.qp-speedrow {
+    direction: rtl;
+}
+
+.qp-speedrow .qp-btn {
+    min-height: 32px;
+    padding: 0 0.7rem;
+}
+
+.qp-speed-title {
+    color: var(--qp-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    min-width: 3rem;
+}
+
+.qp-speed-range {
+    flex: 1 1 180px;
+    width: auto;
+    min-width: 140px;
+    max-width: 380px;
+}
+
+.qp-speed-value {
+    min-width: 4.2rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.qp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.qp-chip {
+    min-height: 28px;
+    padding: 0 0.6rem;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--qp-ink);
+    background: transparent !important;
+    border: 1px solid var(--qp-line);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.qp-chip span {
+    color: var(--qp-ink);
+}
+
+.qp-chip:hover:not(:disabled) {
+    border-color: var(--qp-accent);
+}
+
+.qp-chip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.qp-chip[aria-pressed="true"] {
+    background: var(--qp-accent) !important;
+    border-color: var(--qp-accent);
+}
+
+.qp-chip[aria-pressed="true"] span {
+    color: var(--qp-accent-ink);
+}
+
+/* the compact top player keeps the waveform and transport; presets stay in the bottom player */
+.qp-top .qp-chips {
+    display: none;
+}
+
+.qp-top.is-collapsed .qp-wave,
+.qp-top.is-collapsed .qp-speedrow {
+    display: none;
+}
+
+/* ---------- toast ---------- */
+
+.qp-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 1080;
+    max-width: min(92vw, 520px);
+    padding: 0.65rem 1.05rem;
+    direction: rtl;
+    background: #1d2a2a !important;
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, 12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s, transform 0.18s;
+}
+
+.qp-toast span {
+    color: #ffffff;
+    font-family: "Segoe UI Variable Text", "Segoe UI", Tahoma, system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.qp-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.qp-toast.is-error {
+    background: #b3261e !important;
+}
+
+@media (max-width: 640px) {
+    .qp-top .qp-viewport {
+        height: 76px;
+    }
+
+    .qp-bottom .qp-viewport {
+        height: 140px;
+    }
+
+    .qp-num {
+        width: 3.8rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .qp-toast,
+    .qp-ayah {
+        transition: none;
+    }
+}
