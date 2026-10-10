@@ -131,6 +131,20 @@
                 margin: 0 auto;
             }
 
+            /* Large screens - 115% zoom */
+            @@media (min-width: 1200px) {
+                html {
+                    zoom: 1.15;
+                }
+            }
+
+            /* Small screens - 80% zoom */
+            @@media (max-width: 600px) {
+                html {
+                    zoom: 0.8;
+                }
+            }
+
             .content-area {
                 flex: 1;
                 min-width: 0;
@@ -295,15 +309,95 @@
                 }
 
             /* Responsive */
+            @@media (max-width: 1200px) {
+                .sidebar {
+                    width: 280px;
+                }
+            }
+
+            @@media (max-width: 1024px) {
+                .sidebar {
+                    width: 240px;
+                }
+
+                .person-image {
+                    width: 60px;
+                    height: 60px;
+                }
+
+                .person-name {
+                    font-size: 1rem;
+                }
+
+                .person-description {
+                    font-size: 0.8rem;
+                }
+            }
+
+            @@media (max-width: 900px) {
+                .sidebar {
+                    width: 200px;
+                }
+
+                .person-image {
+                    width: 50px;
+                    height: 50px;
+                }
+
+                .person-name {
+                    font-size: 0.9rem;
+                }
+
+                .person-description {
+                    font-size: 0.75rem;
+                    -webkit-line-clamp: 1;
+                }
+            }
+
             @@media (max-width: 768px) {
+                .main-layout {
+                    gap: 10px;
+                    padding: 10px;
+                }
+
+                .sidebar {
+                    width: 180px;
+                    max-height: calc(100vh - 100px);
+                }
+
+                .person-card {
+                    padding: 10px;
+                    gap: 8px;
+                }
+
+                .person-image {
+                    width: 45px;
+                    height: 45px;
+                }
+
+                .person-name {
+                    font-size: 0.85rem;
+                }
+
+                .person-description {
+                    font-size: 0.7rem;
+                }
+            }
+
+            @@media (max-width: 600px) {
                 .main-layout {
                     flex-direction: column;
                 }
 
                 .sidebar {
                     width: 100%;
-                    max-height: 300px;
+                    max-height: 250px;
                     order: -1;
+                    margin-bottom: 92px !important;
+                }
+
+                .content-area {
+                    order: 0;
                 }
             }
     </style>

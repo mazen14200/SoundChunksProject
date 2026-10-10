@@ -65,6 +65,17 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
+// Redirect root to Quran index page
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/")
+    {
+        context.Response.Redirect("/Quraan/00Fehrs");
+        return;
+    }
+    await next();
+});
+
 // Serve static files from AudioChunks directory
 var audioChunksPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "AudioChunks");
 if (Directory.Exists(audioChunksPath))

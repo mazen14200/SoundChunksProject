@@ -317,7 +317,7 @@
                         text-align: center;
                         padding: 23px 10px 30px;
                         color: #91ada0;
-                        font-size: .82rem;
+                        font-size: 1.40rem;
                         line-height: 1.8
                     }
 
@@ -325,32 +325,110 @@
                             color: var(--gold)
                         }
 
+                        footer .footer-button-wrapper {
+                            margin-top: 12px;
+                        }
+
+                        footer a {
+                            color: var(--gold);
+                            text-decoration: none;
+                            transition: opacity 0.2s;
+                            display: inline-block;
+                        }
+
+                        footer a:hover {
+                            opacity: 0.8;
+                        }
+
+                        .footer-link {
+                            font-size: 0.75rem;
+                            padding: 6px 12px;
+                            border: 1px solid #e3c27a42;
+                            background: #ffffff08;
+                            border-radius: 8px;
+                            color: #e8dfc7;
+                            text-decoration: none;
+                            display: inline-block;
+                        }
+
                     [hidden] {
                         display: none !important
                     }
-                    @@media(max - width:1100px) {
+
+                    @@media (max-width: 1400px) {
                         .grid {
-                            grid-template-columns: repeat(4,minmax(0,1fr))
+                            grid-template-columns: repeat(5, minmax(0, 1fr));
                         }
                     }
-                    @@media(max - width:760px) {
+
+                    @@media (max-width: 1200px) {
+                        .grid {
+                            grid-template-columns: repeat(4, minmax(0, 1fr));
+                        }
+                    }
+
+                    @@media (max-width: 900px) {
+                        .grid {
+                            grid-template-columns: repeat(3, minmax(0, 1fr));
+                        }
+
+                        .toolbar {
+                            max-width: 100%;
+                        }
+                    }
+
+                    @@media (max-width: 760px) {
                         .page-shell {
                             padding: 0 16px
                         }
 
                         .hero {
-                            padding-top: 45px
+                            padding-top: 45px;
+                            padding-bottom: 20px;
+                        }
+
+                        .ornament {
+                            font-size: 20px;
+                            letter-spacing: 8px;
+                        }
+
+                        h1 {
+                            font-size: clamp(1.8rem, 4vw, 2.8rem);
+                        }
+
+                        .intro {
+                            font-size: 0.95rem;
+                            max-width: 100%;
+                        }
+
+                        .stats {
+                            gap: 8px;
+                        }
+
+                        .stat {
+                            padding: 6px 12px;
+                            font-size: 0.82rem;
+                        }
+
+                        .toolbar {
+                            margin: 0 auto 20px;
+                            flex-direction: column;
+                        }
+
+                        #search {
+                            padding: 14px 40px 14px 14px;
+                            font-size: 0.95rem;
                         }
 
                         .grid {
-                            grid-template-columns: repeat(3,minmax(0,1fr));
+                            grid-template-columns: repeat(3, minmax(0, 1fr));
                             gap: 12px
                         }
 
                         .surah-card {
                             min-height: 175px;
                             border-radius: 17px;
-                            padding-inline: 8px
+                            padding: 15px 10px 14px;
                         }
 
                         .surah-arabic {
@@ -360,30 +438,161 @@
                         .surah-english {
                             font-size: .74rem
                         }
+
+                        .verse-count {
+                            font-size: 0.72rem;
+                            padding: 5px 10px;
+                        }
                     }
-                    @@media(max - width:480px) {
+
+                    @@media (max-width: 600px) {
                         .grid {
-                            grid-template-columns: repeat(2,minmax(0,1fr));
-                            gap: 11px
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 10px;
                         }
 
                         .surah-card {
-                            min-height: 165px
+                            min-height: 160px;
+                            padding: 12px 8px 12px;
                         }
 
-                        .toolbar {
-                            margin-bottom: 27px
+                        .surah-number {
+                            font-size: 0.65rem;
+                            padding: 4px 6px;
+                        }
+
+                        .card-mark {
+                            font-size: 20px;
+                        }
+
+                        .surah-arabic {
+                            font-size: 1.25rem;
+                        }
+
+                        .surah-english {
+                            font-size: 0.7rem;
+                        }
+                    }
+
+                    @@media (max-width: 480px) {
+                        .page-shell {
+                            padding: 0 12px;
                         }
 
                         .hero {
-                            padding-inline: 0
+                            padding: 35px 10px 20px;
+                        }
+
+                        .ornament {
+                            font-size: 18px;
+                            letter-spacing: 6px;
+                            margin-bottom: 12px;
+                        }
+
+                        h1 {
+                            font-size: clamp(1.5rem, 5vw, 2.2rem);
                         }
 
                         .intro {
-                            font-size: .92rem
+                            font-size: 0.88rem;
+                            line-height: 1.7;
+                        }
+
+                        .stats {
+                            margin-top: 18px;
+                        }
+
+                        .stat {
+                            padding: 5px 10px;
+                            font-size: 0.78rem;
+                        }
+
+                        .toolbar {
+                            margin-bottom: 20px;
+                        }
+
+                        #search {
+                            padding: 12px 36px 12px 12px;
+                            font-size: 0.9rem;
+                            border-radius: 12px;
+                        }
+
+                        .search-icon {
+                            right: 14px;
+                            font-size: 17px;
+                        }
+
+                        .grid {
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 8px;
+                        }
+
+                        .surah-card {
+                            min-height: 150px;
+                            border-radius: 14px;
+                            padding: 10px 6px 10px;
+                        }
+
+                        .surah-number {
+                            font-size: 0.6rem;
+                            padding: 3px 5px;
+                        }
+
+                        .card-mark {
+                            font-size: 18px;
+                        }
+
+                        .surah-arabic {
+                            font-size: 1.15rem;
+                            margin-top: 15px;
+                        }
+
+                        .surah-english {
+                            font-size: 0.65rem;
+                        }
+
+                        .verse-count {
+                            font-size: 0.68rem;
+                            padding: 4px 8px;
+                            margin-top: 4px;
+                        }
+
+                        footer {
+                            font-size: 0.75rem;
+                            padding: 18px 8px 24px;
+                        }
+
+                        .footer-link {
+                            font-size: 0.7rem;
+                            padding: 5px 10px;
                         }
                     }
-                    @@media(prefers - reduced - motion:reduce) {
+
+                    @@media (max-width: 360px) {
+                        .grid {
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 6px;
+                        }
+
+                        .surah-card {
+                            min-height: 140px;
+                            padding: 8px 4px 8px;
+                        }
+
+                        .surah-arabic {
+                            font-size: 1rem;
+                        }
+
+                        .surah-english {
+                            font-size: 0.6rem;
+                        }
+
+                        .verse-count {
+                            font-size: 0.62rem;
+                            padding: 3px 6px;
+                        }
+                    }
+                    @@media (prefers-reduced-motion: reduce) {
                         *, *::before, *::after {
                             scroll-behavior: auto !important;
                             transition: none !important
@@ -398,7 +607,7 @@
             <p class="intro">تصفّح سور القرآن الكريم في بطاقات أنيقة، مع اسم كل سورة ورقمها وعدد آياتها.</p>
             <div class="stats">
                 <div class="stat"><strong>١١٤</strong> سورة</div>
-                <div class="stat"><strong>٦٢٣٦</strong> آية تقريبًا</div>
+                <div class="stat"><strong>٦٢٣٦</strong> آية </div>
                 <div class="stat">تصميم متجاوب وأنيق</div>
             </div>
         </header>
@@ -1097,7 +1306,11 @@
                 </a>
             </section>
         </main>
-        <footer>صُممت بعناية ومحبة <span>للقرآن الكريم</span> · اضغط على أي بطاقة لفتح رابطها الداخلي.</footer>
+        <footer>صُممت بعناية ومحبة <span>للقرآن الكريم</span> · اضغط على أي بطاقة لفتح رابطها الداخلي.
+            <div class="footer-button-wrapper">
+                <a href="/Index" class="footer-link">← Cutter</a>
+            </div>
+</footer>
 
         <!-- Modal for Sheikh Selection -->
         <div id="sheikh-modal" class="modal-overlay" style="display: none;">

@@ -20,8 +20,8 @@ public class PersonService
             new Person
             {
                 Id = "Menshawi_Talliem",
-                Name = "القارئ الثاني",
-                Description = "مقريء القرآن بخبرة طويلة في التلاوة",
+                Name = "القارئ المنشاوي المُعلم",
+                Description = "مقريء القرآن معلم الاطفال - يردد خلفه طفل - محمد صديق المنشاوي",
                 ImagePath = "https://via.placeholder.com/70"
             },
             new Person
@@ -45,13 +45,6 @@ public class PersonService
                 Description = "أحد أشهر قراء العالم الإسلامي",
                 ImagePath = "https://via.placeholder.com/70"
             },
-            new Person
-            {
-                Id = "Me6",
-                Name = "القارئ السادس",
-                Description = "صاحب أداء رصين وتجويد فريد",
-                ImagePath = "https://via.placeholder.com/70"
-            }
         };
     }
 
