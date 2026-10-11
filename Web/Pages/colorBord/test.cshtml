@@ -1,0 +1,138 @@
+﻿@page
+@{
+    Layout = "_QuraanLayout";
+    ViewData["Title"] = "الوان اختبار";
+}
+<style>
+    .person-card, .person-info {
+        min-height: 300px !important;
+        width: 100% !important;
+    }
+    .color-input-container {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+    }
+    .color-input-container textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+    .color-input-container button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .color-input-container button:hover {
+        background: #0056b3;
+    }
+    .color-display-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .color-card-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .color-info {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 14px;
+        padding: 5px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 4px;
+    }
+
+    .ac-app {
+        --ac-paper: #000000 !important;
+    }
+</style>
+
+<div class="ac-app" id="app">
+
+    <div class="color-input-container">
+        <textarea id="colorInput" placeholder="Paste your color data here...
+
+Example:
+Original color: #E9D8C7D9
+Kelvin: 4000K
+
+Generated shades:
+
+1. #E9D0BAD9 | RGB: (233, 208, 186) | Influence: 20%
+2. #E9C8ACD9 | RGB: (233, 200, 172) | Influence: 40%
+3. #E9BF9FD9 | RGB: (233, 191, 159) | Influence: 60%
+4. #E9B792D9 | RGB: (233, 183, 146) | Influence: 80%
+5. #E9AF84D9 | RGB: (233, 175, 132) | Influence: 100%"></textarea>
+        <button onclick="generateColorCards()">Generate Color Cards</button>
+    </div>
+
+    <div id="colorDisplay" class="color-display-container"></div>
+
+    <audio id="audio" preload="auto"></audio>
+    <div class="ac-toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+    function generateColorCards() {
+        const textarea = document.getElementById('colorInput');
+        const displayContainer = document.getElementById('colorDisplay');
+        const text = textarea.value;
+
+        // Extract all hex colors from the text
+        const hexRegex = /#[A-Fa-f0-9]{6,8}/g;
+        const hexColors = text.match(hexRegex);
+
+        if (!hexColors || hexColors.length === 0) {
+            alert('No hex colors found in the text');
+            return;
+        }
+
+        // Extract influence percentages
+        const influenceRegex = /Influence:\s*(\d+)%/g;
+        const influences = [];
+        let match;
+        while ((match = influenceRegex.exec(text)) !== null) {
+            influences.push(match[1]);
+        }
+
+        // Clear previous display
+        displayContainer.innerHTML = '';
+
+        // Generate color cards
+        hexColors.forEach((hexColor, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'color-card-wrapper';
+
+            const card = document.createElement('div');
+            card.className = 'person-card';
+            card.style.setProperty('background-color', hexColor, 'important');
+
+            const info = document.createElement('div');
+            info.className = 'person-info';
+
+            card.appendChild(info);
+            wrapper.appendChild(card);
+
+            // Add color info below the card
+            const colorInfo = document.createElement('div');
+            colorInfo.className = 'color-info';
+            const influence = influences[index] || (index === 0 ? 'Original' : 'N/A');
+            colorInfo.innerHTML = `<strong>${hexColor}</strong><br>Influence: ${influence}%`;
+
+            wrapper.appendChild(colorInfo);
+            displayContainer.appendChild(wrapper);
+        });
+    }
+</script>

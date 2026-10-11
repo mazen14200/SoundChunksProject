@@ -53,32 +53,32 @@ public class QuranCacheCleanupService : BackgroundService
                 break;
             }
 
-            // Perform cleanup
-            if (!stoppingToken.IsCancellationRequested)
-            {
-                await PerformCleanupAsync(stoppingToken);
-            }
+            //// Perform cleanup
+            //if (!stoppingToken.IsCancellationRequested)
+            //{
+            //    await PerformCleanupAsync(stoppingToken);
+            //}
         }
 
         _logger.LogInformation("Quran Cache Cleanup Service stopped.");
     }
 
-    private async Task PerformCleanupAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            _logger.LogInformation("Starting Quran cache cleanup at {Time}", DateTime.UtcNow);
+    //private async Task PerformCleanupAsync(CancellationToken cancellationToken)
+    //{
+    //    try
+    //    {
+    //        _logger.LogInformation("Starting Quran cache cleanup at {Time}", DateTime.UtcNow);
 
-            await Task.Run(() =>
-            {
-                _quranAudioService.TrimCache();
-            }, cancellationToken);
+    //        await Task.Run(() =>
+    //        {
+    //            _quranAudioService.TrimCache();
+    //        }, cancellationToken);
 
-            _logger.LogInformation("Quran cache cleanup completed successfully at {Time}", DateTime.UtcNow);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during Quran cache cleanup");
-        }
-    }
+    //        _logger.LogInformation("Quran cache cleanup completed successfully at {Time}", DateTime.UtcNow);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error during Quran cache cleanup");
+    //    }
+    //}
 }

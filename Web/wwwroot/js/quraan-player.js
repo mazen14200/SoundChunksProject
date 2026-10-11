@@ -1,13 +1,16 @@
 /*
- * Quraan ayah player.
+ * Quraan ayah player (everything runs in the browser; the server only lists and serves the mp3 files).
  *
  * Runs on /Quraan/Surah/{surahId}?sheikhId=... pages (loaded from _QuraanLayout).
+ *  - On open it downloads the surah's ayah files from the chosen sheikh's folder, ONCE, into the browser's own
+ *    storage (IndexedDB). Next visits use the saved copy (the server's file version tells if it is still valid).
+ *  - Each file is decoded here to get its exact length and its loudness profile (the waveform).
+ *  - "Joining" is virtual: a track is a list of ayah files played back to back with one timeline, one seek bar and
+ *    one waveform. Any range (an ayah, from..to, the whole surah) is built instantly, no server work.
  *  - Splits the text inside #app into ayat. An ayah is the text that ends with its <label>(N)</label> marker.
  *  - Top player (sticky): the clicked ayah, or a range ("from / to" fields, Shift+click). Has a waveform.
- *  - Bottom player: the whole surah as one audio file with a waveform. Clicking an ayah never moves it.
+ *  - Bottom player: the whole surah with a waveform. Clicking an ayah never moves it.
  *  - Both players: play, pause, resume, stop, -10/+10 seconds, speed 25%-400%. No cutting.
- *
- * The audio itself comes from /api/quranaudio/* (see QuranAudioController).
  */
 (function () {
     'use strict';
@@ -39,6 +42,11 @@
     const RULER_H = 20;
     const SILENCE = 0.07;        // sqrt-scaled amplitude below which a bar becomes a flat line
     const MIN_REF = 0.3;
+    const ANALYSIS_RATE = 8000;        // sample rate used to measure each file and draw its waveform
+    const PEAKS_PER_SECOND = 25;
+    const DOWNLOAD_CONCURRENCY = 3;
+    const DB_NAME = 'qp-audio';
+    const AUDIO_TYPE = 'audio/mpeg';
     const RULER_STEPS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200];
 
     const Q = {
@@ -52,9 +60,7 @@
         selection: null,         // { from, to }
         anchor: null,
         repeat: false,
-        token: 0,
-        abort: null,
-        bottomRequested: false
+        token: 0
     };
 
     // =====================================================================
@@ -159,16 +165,476 @@
     };
 
     // =====================================================================
+    // saved copy of the audio inside the browser (IndexedDB)
+    // =====================================================================
+
+    const Store = {
+        dbPromise: null,
+
+        open: function () {
+            if (this.dbPromise) return this.dbPromise;
+            this.dbPromise = new Promise(function (resolve) {
+                try {
+                    const rq = indexedDB.open(DB_NAME, 1);
+                    rq.onupgradeneeded = function () { rq.result.createObjectStore('files', { keyPath: 'key' }); };
+                    rq.onsuccess = function () { resolve(rq.result); };
+                    rq.onerror = function () { resolve(null); };
+                    rq.onblocked = function () { resolve(null); };
+                } catch (_) {
+                    resolve(null);   // storage unavailable (private mode ...): the page still works, it just downloads again next time
+                }
+            });
+            return this.dbPromise;
+        },
+
+        get: async function (key) {
+            const db = await this.open();
+            if (!db) return null;
+            return new Promise(function (resolve) {
+                try {
+                    const rq = db.transaction('files', 'readonly').objectStore('files').get(key);
+                    rq.onsuccess = function () { resolve(rq.result || null); };
+                    rq.onerror = function () { resolve(null); };
+                } catch (_) { resolve(null); }
+            });
+        },
+
+        put: async function (record) {
+            const db = await this.open();
+            if (!db) return;
+            return new Promise(function (resolve) {
+                try {
+                    const tx = db.transaction('files', 'readwrite');
+                    tx.objectStore('files').put(record);
+                    tx.oncomplete = function () { resolve(); };
+                    tx.onerror = function () { resolve(); };     // quota exceeded etc.: not fatal
+                    tx.onabort = function () { resolve(); };
+                } catch (_) { resolve(); }
+            });
+        }
+    };
+
+    // =====================================================================
+    // measuring a file: exact length + loudness profile
+    // =====================================================================
+
+    function decodeAudio(ctx, buffer) {
+        return new Promise(function (resolve, reject) {
+            const r = ctx.decodeAudioData(buffer, resolve, reject);   // old Safari only has the callback form
+            if (r && typeof r.then === 'function') r.then(resolve, reject);
+        });
+    }
+
+    // returns { duration (seconds), peaks (Uint8Array, PEAKS_PER_SECOND values per second, sqrt-scaled 0..255) }
+    async function analyze(blob) {
+        const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+        if (!Ctx) throw new Error('هذا المتصفح لا يدعم تحليل الصوت.');
+        const ctx = new Ctx(1, 1, ANALYSIS_RATE);                  // decoding at 8 kHz keeps memory small
+        const decoded = await decodeAudio(ctx, await blob.arrayBuffer());
+
+        const length = decoded.length;
+        const channels = [];
+        for (let c = 0; c < decoded.numberOfChannels; c++) channels.push(decoded.getChannelData(c));
+
+        const bucket = Math.round(decoded.sampleRate / PEAKS_PER_SECOND);
+        const count = Math.ceil(length / bucket);
+        const peaks = new Uint8Array(count);
+        for (let b = 0; b < count; b++) {
+            const from = b * bucket;
+            const to = Math.min(length, from + bucket);
+            let max = 0;
+            for (let c = 0; c < channels.length; c++) {
+                const data = channels[c];
+                for (let i = from; i < to; i++) {
+                    const v = data[i] < 0 ? -data[i] : data[i];
+                    if (v > max) max = v;
+                }
+            }
+            peaks[b] = Math.min(255, Math.round(255 * Math.sqrt(Math.min(1, max))));
+        }
+        return { duration: length / decoded.sampleRate, peaks: peaks };
+    }
+
+    // =====================================================================
+    // getting the files: server -> browser storage, once
+    // =====================================================================
+
+    const Loader = {
+        entries: new Map(),     // n -> { n, url, size, version } from the server
+        recs: new Map(),        // n -> { n, blob, duration, peaks } ready to play
+        inflight: new Map(),
+        failed: new Set(),
+        onProgress: null,
+
+        setEntries: function (list) {
+            const self = this;
+            list.forEach(function (e) { self.entries.set(e.n, e); });
+        },
+
+        keyOf: function (n) { return Q.sheikhId + '/' + Q.surahId + '/' + n; },
+
+        progress: function () {
+            return { done: this.recs.size + this.failed.size, total: this.entries.size };
+        },
+
+        ensure: function (n) {
+            const self = this;
+            if (this.recs.has(n)) return Promise.resolve(this.recs.get(n));
+            if (this.failed.has(n)) return Promise.reject(new Error('تعذّر تجهيز الآية ' + n + '.'));
+            if (this.inflight.has(n)) return this.inflight.get(n);
+
+            const p = this.load(n).then(function (rec) {
+                self.recs.set(n, rec);
+                self.inflight.delete(n);
+                if (self.onProgress) self.onProgress();
+                return rec;
+            }, function (err) {
+                self.failed.add(n);
+                self.inflight.delete(n);
+                if (self.onProgress) self.onProgress();
+                throw err;
+            });
+            this.inflight.set(n, p);
+            return p;
+        },
+
+        load: async function (n) {
+            const e = this.entries.get(n);
+            if (!e) throw new Error('لا يوجد ملف صوت لهذه الآية.');
+            const key = this.keyOf(n);
+
+            const saved = await Store.get(key);
+            if (saved && saved.version === e.version && saved.blob && saved.peaks && saved.duration > 0) {
+                return { n: n, blob: saved.blob, duration: saved.duration, peaks: new Uint8Array(saved.peaks) };
+            }
+
+            const res = await fetch(e.url);
+            if (!res.ok) throw new Error('تعذّر تنزيل الآية ' + n + '.');
+            let blob = await res.blob();
+            if (!blob.type) blob = blob.slice(0, blob.size, AUDIO_TYPE);
+
+            let info;
+            try {
+                info = await analyze(blob);
+            } catch (err) {
+                throw new Error('تعذّر قراءة ملف الآية ' + n + '.');
+            }
+            if (!(info.duration > 0)) throw new Error('ملف الآية ' + n + ' فارغ.');
+
+            Store.put({ key: key, version: e.version, blob: blob, duration: info.duration, peaks: info.peaks });
+            return { n: n, blob: blob, duration: info.duration, peaks: info.peaks };
+        },
+
+        // downloads the given ayat a few at a time; resolves when every one has finished or failed
+        startBackground: function (ns) {
+            const self = this;
+            const queue = ns.slice();
+            const worker = async function () {
+                while (queue.length) {
+                    const n = queue.shift();
+                    try { await self.ensure(n); } catch (_) { /* recorded in failed */ }
+                }
+            };
+            const workers = [];
+            for (let i = 0; i < DOWNLOAD_CONCURRENCY; i++) workers.push(worker());
+            return Promise.all(workers);
+        }
+    };
+
+    // Joins ayat into one track: items back to back with exact lengths, plus one combined loudness profile
+    function buildTrack(ns) {
+        const items = [];
+        const segments = [];
+        let cursor = 0;
+        ns.forEach(function (n) {
+            const rec = Loader.recs.get(n);
+            items.push({ n: n, blob: rec.blob, start: cursor, end: cursor + rec.duration });
+            segments.push({ n: n, start: cursor, end: cursor + rec.duration });
+            cursor += rec.duration;
+        });
+
+        const peaks = new Uint8Array(Math.ceil(cursor * PEAKS_PER_SECOND) + 2);
+        items.forEach(function (it) {
+            const rec = Loader.recs.get(it.n);
+            const base = Math.round(it.start * PEAKS_PER_SECOND);
+            for (let j = 0; j < rec.peaks.length; j++) {
+                const g = base + j;
+                if (g < peaks.length && rec.peaks[j] > peaks[g]) peaks[g] = rec.peaks[j];
+            }
+        });
+
+        return { items: items, segments: segments, duration: cursor, peaks: peaks, peaksPerSecond: PEAKS_PER_SECOND };
+    }
+
+    // =====================================================================
+    // one audio "element" made of several files, with ONE timeline
+    // Implements the small part of HTMLMediaElement that the player uses.
+    // Two real <audio> elements take turns: while one plays, the other has the next file ready.
+    // =====================================================================
+
+    class VirtualAudio extends EventTarget {
+        constructor() {
+            super();
+            this.slots = [new Audio(), new Audio()];
+            this.active = 0;
+            this.items = [];            // { n, start, end }
+            this.urls = [];
+            this.idx = -1;              // item playing in the active slot
+            this.preIdx = -1;           // item preloaded in the other slot
+            this.loop = false;
+            this._paused = true;
+            this._ended = false;
+            this._switching = false;
+            this._suppressPlay = false;
+            this._advIdx = -1;
+            this._timer = 0;
+            const self = this;
+            this.slots.forEach(function (slot, i) { slot.preload = 'auto'; self._wire(slot, i); });
+        }
+
+        get slot() { return this.slots[this.active]; }
+        get paused() { return this._paused; }
+        get ended() { return this._ended; }
+        get duration() { return this.items.length ? this.items[this.items.length - 1].end : NaN; }
+        get playbackRate() { return this.slot.playbackRate; }
+
+        get currentTime() {
+            if (!this.items.length || this.idx < 0) return 0;
+            if (this._ended) return this.duration;
+            const it = this.items[this.idx];
+            return Math.min(it.end, it.start + Math.max(0, this.slot.currentTime));
+        }
+
+        set currentTime(t) {
+            if (!this.items.length) return;
+            t = clamp(t, 0, this.duration);
+            this._ended = false;
+            const j = this._indexAt(t);
+            this._goTo(j, Math.max(0, t - this.items[j].start));
+            if (t >= this.duration - 0.001 && this._paused) this._ended = true;   // like a real element parked at its end
+        }
+
+        _emit(type) { this.dispatchEvent(new Event(type)); }
+
+        _wire(slot, i) {
+            const self = this;
+            const mine = function () { return i === self.active && !self._switching; };
+            slot.addEventListener('timeupdate', function () { if (mine()) self._emit('timeupdate'); });
+            slot.addEventListener('seeked', function () { if (mine()) self._emit('seeked'); });
+            slot.addEventListener('ratechange', function () { if (mine()) self._emit('ratechange'); });
+            slot.addEventListener('play', function () {
+                if (!mine()) return;
+                if (self._suppressPlay) { self._suppressPlay = false; return; }   // internal hand-over between files
+                self._emit('play');
+            });
+            slot.addEventListener('pause', function () {
+                if (!mine() || slot.ended) return;
+                self._paused = true;
+                self._clearTimer();
+                self._emit('pause');
+            });
+            slot.addEventListener('ended', function () {
+                if (!mine() || self._paused) return;
+                self._advance();
+            });
+            slot.addEventListener('error', function () {
+                if (i === self.active && slot.getAttribute('src')) self._emit('error');
+            });
+        }
+
+        _indexAt(t) {
+            const items = this.items;
+            let lo = 0;
+            let hi = items.length - 1;
+            while (lo < hi) {
+                const mid = (lo + hi + 1) >> 1;
+                if (items[mid].start <= t) lo = mid; else hi = mid - 1;
+            }
+            return lo;
+        }
+
+        _setSrc(slot, j) {
+            slot.src = this.urls[j];
+        }
+
+        _preload(j) {
+            const other = this.slots[1 - this.active];
+            if (j >= 0 && j < this.items.length) {
+                if (this.preIdx !== j) {
+                    other.pause();
+                    this._setSrc(other, j);
+                    other.currentTime = 0;
+                }
+                this.preIdx = j;
+            } else {
+                this.preIdx = -1;
+            }
+        }
+
+        _goTo(j, offset) {
+            const wasPlaying = !this._paused;
+            this._switching = true;
+            try {
+                this._advIdx = -1;
+                if (j === this.idx) {
+                    this.slot.currentTime = offset;
+                } else if (j === this.preIdx) {
+                    const old = this.slot;
+                    this.active = 1 - this.active;
+                    this.idx = j;
+                    old.pause();
+                    this.slot.currentTime = offset;
+                    this._preload(j + 1);
+                } else {
+                    this.idx = j;
+                    this._setSrc(this.slot, j);
+                    this.slot.currentTime = offset;
+                    this._preload(j + 1);
+                }
+            } finally {
+                this._switching = false;
+            }
+            if (wasPlaying) this._playSlot();
+        }
+
+        // the current file is over: hand over to the next one (or finish / loop)
+        _advance() {
+            if (this._advIdx === this.idx) return;
+            const last = this.items.length - 1;
+
+            if (this.idx >= last) {
+                if (this.loop) {
+                    this._goTo(0, 0);
+                    return;
+                }
+                this._paused = true;
+                this._ended = true;
+                this._clearTimer();
+                this._emit('timeupdate');
+                this._emit('ended');
+                return;
+            }
+
+            this._advIdx = this.idx;
+            if (this.preIdx !== this.idx + 1) {
+                this._goTo(this.idx + 1, 0);
+                return;
+            }
+
+            const old = this.slot;
+            this.active = 1 - this.active;
+            this.idx += 1;
+            const self = this;
+            this._suppressPlay = true;
+            setTimeout(function () { self._suppressPlay = false; }, 300);
+            this._playSlot();
+            old.pause();
+            this._preload(this.idx + 1);
+            this._emit('timeupdate');
+        }
+
+        _check() {
+            if (this._paused || this._switching || this.idx < 0 || this.idx >= this.items.length - 1) return;
+            const it = this.items[this.idx];
+            const rate = this.slot.playbackRate || 1;
+            // start the next file a hair early so there is no audible gap
+            if (this.slot.currentTime >= (it.end - it.start) - 0.03 * rate) this._advance();
+        }
+
+        _startTimer() {
+            if (this._timer) return;
+            const self = this;
+            this._timer = setInterval(function () { self._check(); }, 20);
+        }
+
+        _clearTimer() {
+            clearInterval(this._timer);
+            this._timer = 0;
+        }
+
+        _playSlot() {
+            this._startTimer();
+            const p = this.slot.play();
+            if (p && typeof p.catch === 'function') p.catch(function () { /* the caller of play() sees its own promise */ });
+            return p || Promise.resolve();
+        }
+
+        // items: [{ n, blob, start, end }]
+        setTrack(items) {
+            this.clear();
+            this.urls = items.map(function (it) { return URL.createObjectURL(it.blob); });
+            this.items = items.map(function (it) { return { n: it.n, start: it.start, end: it.end }; });
+            this.idx = 0;
+            this.active = 0;
+            this.preIdx = -1;
+            this._switching = true;
+            this._setSrc(this.slot, 0);
+            this.slot.currentTime = 0;
+            this._switching = false;
+            this._preload(1);
+            const self = this;
+            setTimeout(function () { if (self.items.length) self._emit('loadedmetadata'); }, 0);
+        }
+
+        clear() {
+            this._switching = true;
+            this._clearTimer();
+            this.slots.forEach(function (slot) {
+                slot.pause();
+                slot.removeAttribute('src');
+                slot.load();
+            });
+            this.urls.forEach(function (u) { URL.revokeObjectURL(u); });
+            this.urls = [];
+            this.items = [];
+            this.idx = -1;
+            this.preIdx = -1;
+            this.active = 0;
+            this._paused = true;
+            this._ended = false;
+            this._advIdx = -1;
+            this._switching = false;
+        }
+
+        play() {
+            if (!this.items.length) return Promise.reject(new Error('no audio'));
+            if (this._ended || this.currentTime >= this.duration - 0.001) {
+                this._ended = false;
+                this._paused = true;
+                this.currentTime = 0;                 // start again from the beginning
+                this._ended = false;
+            }
+            this._paused = false;
+            return this._playSlot();
+        }
+
+        pause() {
+            this._paused = true;
+            this._clearTimer();
+            this.slot.pause();
+        }
+
+        setRate(rate) {
+            this.slots.forEach(function (slot) {
+                slot.defaultPlaybackRate = rate;      // survives choosing another source
+                slot.playbackRate = rate;
+                slot.preservesPitch = true;           // natural voice at any speed
+                slot.mozPreservesPitch = true;
+                slot.webkitPreservesPitch = true;
+            });
+        }
+    }
+
+    // =====================================================================
     // the player (used twice: top and bottom)
     // =====================================================================
 
     class QPlayer {
         constructor(mount, opts) {
             this.opts = Object.assign({ zoom: false, onTime: null, onSegment: null, onPlay: null, onIdle: null }, opts);
-            this.audio = new Audio();
-            this.audio.preload = 'auto';
+            this.audio = new VirtualAudio();
 
-            this.loadedUrl = null;
+            this.loaded = false;
             this.autoplay = false;
             this.disabled = true;
             this.ready = false;
@@ -374,14 +840,14 @@
 
             // audio element
             a.addEventListener('loadedmetadata', function () {
-                if (!self.loadedUrl) return;
+                if (!self.loaded) return;
                 self.ready = true;
                 if (isFinite(a.duration) && a.duration > 0) self.duration = a.duration;
                 self.syncSpeed();
                 self.totalText.textContent = ' / ' + fmt(self.duration);
                 if (self.seek) self.seek.max = String(self.duration || 1);
                 self.fit();
-                self.setOverlay(self.peaks ? null : 'جارٍ بناء شكل الموجة\u2026');
+                self.setOverlay(null);
                 self.updateControls();
                 self.tick();
                 if (self.autoplay) {
@@ -414,7 +880,7 @@
                 if (pct !== Speed.pct) Speed.set(pct);
             });
             a.addEventListener('error', function () {
-                if (!self.loadedUrl) return;
+                if (!self.loaded) return;
                 self.ready = false;
                 self.transport = 'stopped';
                 self.setOverlay('تعذّر تشغيل هذا الملف الصوتي في المتصفح.');
@@ -446,11 +912,9 @@
         }
 
         unload() {
-            try { this.audio.pause(); } catch (_) { /* ignore */ }
-            this.loadedUrl = null;
+            this.audio.clear();
+            this.loaded = false;
             this.autoplay = false;
-            this.audio.removeAttribute('src');
-            this.audio.load();
             this.ready = false;
             this.transport = 'stopped';
             this.duration = 0;
@@ -466,28 +930,21 @@
             if (this.opts.onIdle) this.opts.onIdle(this);
         }
 
-        // data: { url, duration, segments }
+        // data: { items, segments, duration, peaks, peaksPerSecond }  (see buildTrack)
         load(data, options) {
             this.unload();
             this.disabled = false;
+            this.loaded = true;
             this.duration = data.duration || 0;
             this.segments = data.segments || [];
-            this.loadedUrl = data.url;
+            this.peaks = data.peaks;
+            this.peaksPerSecond = data.peaksPerSecond > 0 ? data.peaksPerSecond : PEAKS_PER_SECOND;
+            this.ref = computeReference(data.peaks);
             this.autoplay = !!(options && options.autoplay);
-            this.setOverlay('جارٍ تحميل الصوت\u2026');
-            this.audio.src = data.url;
-            this.updateControls();
-        }
-
-        applyPeaks(data) {
-            const bin = atob(data.peaks || '');
-            const arr = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-            this.peaks = arr;
-            this.peaksPerSecond = data.peaksPerSecond > 0 ? data.peaksPerSecond : 25;
-            this.ref = computeReference(arr);
             this.setOverlay(null);
+            this.audio.setTrack(data.items);
             this.requestDraw();
+            this.updateControls();
         }
 
         updateControls() {
@@ -561,11 +1018,7 @@
 
         syncSpeed() {
             const rate = Speed.pct / 100;
-            this.audio.defaultPlaybackRate = rate;   // survives choosing another source
-            this.audio.playbackRate = rate;
-            this.audio.preservesPitch = true;        // natural voice at any speed
-            this.audio.mozPreservesPitch = true;
-            this.audio.webkitPreservesPitch = true;
+            this.audio.setRate(rate);
 
             const pos = Speed.toPos(Speed.pct);
             this.speedSlider.value = String(pos);
@@ -985,27 +1438,16 @@
     if (topPanel.classList.contains('is-collapsed')) setLabel(collapseBtn, 'فتح');
 
     // =====================================================================
-    // server calls
+    // the only server call: which files exist (everything else happens in the browser)
     // =====================================================================
 
-    async function api(name, params, signal) {
+    async function api(name, params) {
         const qs = new URLSearchParams(Object.assign({ sheikhId: Q.sheikhId, surahId: Q.surahId }, params || {}));
-        const res = await fetch('/api/quranaudio/' + name + '?' + qs.toString(), { signal: signal });
+        const res = await fetch('/api/quranaudio/' + name + '?' + qs.toString());
         let data = {};
         try { data = await res.json(); } catch (_) { /* no body */ }
         if (!res.ok) throw new Error(data.error || ('حدث خطأ (' + res.status + ')'));
         return data;
-    }
-
-    async function loadPeaks(player, params, isCurrent) {
-        try {
-            const data = await api('waveform', params);
-            if (!isCurrent()) return;
-            player.applyPeaks(data);
-        } catch (err) {
-            if (!isCurrent()) return;
-            player.setOverlay('تعذّر رسم الموجة، لكن التشغيل يعمل.');
-        }
     }
 
     // =====================================================================
@@ -1060,34 +1502,50 @@
         setNow(null);
 
         const token = ++Q.token;
-        if (Q.abort) Q.abort.abort();
-        Q.abort = typeof AbortController !== 'undefined' ? new AbortController() : null;
-
         top.unload();
-        top.setOverlay('جارٍ تجهيز الصوت\u2026 (قد يستغرق المدى الكبير وقتًا في أول مرة)');
-        setStatus(rangeLabel(from, to) + ' \u2013 جارٍ التجهيز\u2026');
 
-        try {
-            const audio = await api('audio', { from: from, to: to }, Q.abort ? Q.abort.signal : undefined);
-            if (token !== Q.token) return;
-
-            top.audio.loop = Q.repeat;
-            top.load(audio, { autoplay: autoplay });
-
-            let message = rangeLabel(from, to);
-            if (audio.missing && audio.missing.length) {
-                message += ' \u2013 لا توجد ملفات للآيات: ' + audio.missing.join('، ');
-                toast('لا توجد ملفات صوت للآيات: ' + audio.missing.join('، '));
-            }
-            setStatus(message);
-
-            loadPeaks(top, { from: from, to: to }, function () { return token === Q.token; });
-        } catch (err) {
-            if (token !== Q.token || (err && err.name === 'AbortError')) return;
-            top.setOverlay(err.message);
-            setStatus(err.message, true);
-            toast(err.message, true);
+        const wanted = [];
+        const skipped = [];
+        for (let n = from; n <= to; n++) {
+            if (Q.has.has(n) && !Loader.failed.has(n)) wanted.push(n); else skipped.push(n);
         }
+        if (!wanted.length) {
+            const message = 'لا توجد ملفات صوت في هذا المدى.';
+            top.setOverlay(message);
+            setStatus(message, true);
+            toast(message, true);
+            return;
+        }
+
+        if (wanted.some(function (n) { return !Loader.recs.has(n); })) {
+            top.setOverlay('جارٍ نقل الصوت إلى جهازك\u2026');
+            setStatus(rangeLabel(from, to) + ' \u2013 جارٍ التنزيل\u2026');
+        }
+
+        // anything not on this device yet is fetched now, ahead of the background download
+        await Promise.all(wanted.map(function (n) { return Loader.ensure(n).catch(function () { return null; }); }));
+        if (token !== Q.token) return;
+
+        const ready = wanted.filter(function (n) { return Loader.recs.has(n); });
+        wanted.forEach(function (n) { if (!Loader.recs.has(n)) skipped.push(n); });
+        if (!ready.length) {
+            const message = 'تعذّر تجهيز الصوت لهذا المدى.';
+            top.setOverlay(message);
+            setStatus(message, true);
+            toast(message, true);
+            return;
+        }
+
+        top.audio.loop = Q.repeat;
+        top.load(buildTrack(ready), { autoplay: autoplay });
+
+        let message = rangeLabel(from, to);
+        if (skipped.length) {
+            skipped.sort(function (a, b) { return a - b; });
+            message += ' \u2013 لا توجد ملفات للآيات: ' + skipped.join('، ');
+            toast('لا توجد ملفات صوت للآيات: ' + skipped.join('، '));
+        }
+        setStatus(message);
     }
 
     function runFields() {
@@ -1185,17 +1643,30 @@
         setStatus(message, true);
     }
 
-    async function loadBottom() {
-        if (Q.bottomRequested || !Q.ready) return;
-        Q.bottomRequested = true;
-        bottom.setOverlay('جارٍ تجهيز ملف السورة كاملة\u2026 (في أول مرة فقط قد يستغرق وقتًا)');
-        try {
-            const audio = await api('audio', { from: Q.min, to: Q.max });
-            bottom.load(audio, { autoplay: false });
-            loadPeaks(bottom, { from: Q.min, to: Q.max }, function () { return true; });
-        } catch (err) {
-            bottom.setDisabled(err.message);
+    // progress of the background download, shown while the whole-surah player is being prepared
+    let bottomDone = false;
+    function showProgress() {
+        const p = Loader.progress();
+        if (!bottomDone) bottom.setOverlay('جارٍ نقل صوت السورة إلى جهازك\u2026 ' + p.done + ' / ' + p.total);
+        if (!Q.selection && !bottomDone) {
+            setStatus('الآيات المتاحة من ' + Q.min + ' إلى ' + Q.max + ' \u2013 جارٍ تنزيل الصوت ' + p.done + ' / ' + p.total);
         }
+    }
+
+    async function loadBottom() {
+        showProgress();
+        await Loader.startBackground(Array.from(Q.has).sort(function (a, b) { return a - b; }));
+        bottomDone = true;
+
+        const ns = Array.from(Q.has).sort(function (a, b) { return a - b; }).filter(function (n) { return Loader.recs.has(n); });
+        if (!ns.length) {
+            bottom.setDisabled('تعذّر تجهيز صوت السورة.');
+            return;
+        }
+        bottom.load(buildTrack(ns), { autoplay: false });
+
+        if (Loader.failed.size) toast('تعذّر تجهيز بعض الآيات: ' + Array.from(Loader.failed).sort(function (a, b) { return a - b; }).join('، '), true);
+        if (!Q.selection) setStatus('الآيات المتاحة من ' + Q.min + ' إلى ' + Q.max + '.');
     }
 
     async function start() {
@@ -1225,9 +1696,13 @@
             return;
         }
 
-        Q.has = new Set(files.ayat);
-        Q.min = files.ayat[0];
-        Q.max = files.ayat[files.ayat.length - 1];
+        Loader.setEntries(files.ayat);
+        Loader.onProgress = showProgress;
+
+        const numbers = files.ayat.map(function (a) { return a.n; });
+        Q.has = new Set(numbers);
+        Q.min = numbers[0];
+        Q.max = numbers[numbers.length - 1];
         Q.ready = true;
         fromInput.min = toInput.min = String(Q.min);
         fromInput.max = toInput.max = String(Q.max);
@@ -1241,22 +1716,13 @@
         top.setOverlay('اضغط على آية، أو اكتب مدى الآيات ثم "تنفيذ".');
         setStatus('الآيات المتاحة من ' + Q.min + ' إلى ' + Q.max + '.');
 
-        if ('IntersectionObserver' in window) {
-            const io = new IntersectionObserver(function (entries) {
-                if (entries.some(function (en) { return en.isIntersecting; })) {
-                    io.disconnect();
-                    loadBottom();
-                }
-            }, { rootMargin: '600px 0px' });
-            io.observe(bottomPanel);
-        } else {
-            loadBottom();
-        }
+        // as soon as the page is open the whole surah is moved to this device (or read from the saved copy)
+        loadBottom();
     }
 
     start();
 
     if (window.__QP_TEST__) {
-        window.__QP_TEST__.api = { Q: Q, top: top, bottom: bottom, Speed: Speed, ayahSpans: ayahSpans };
+        window.__QP_TEST__.api = { Q: Q, top: top, bottom: bottom, Speed: Speed, ayahSpans: ayahSpans, Loader: Loader, Store: Store };
     }
 })();
