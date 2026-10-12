@@ -143,6 +143,13 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
 }
 
+.qp-top.has-sheikh-card {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+}
+
 .qp-bottom {
     margin: 1.75rem 0 0;
 }
@@ -282,7 +289,7 @@
 }
 
 .qp-top .qp-viewport {
-    height: 96px;
+    height: 78px;
 }
 
 .qp-bottom .qp-viewport {
@@ -534,7 +541,7 @@
 
 @media (max-width: 640px) {
     .qp-top .qp-viewport {
-        height: 76px;
+        height: 65px;
     }
 
     .qp-bottom .qp-viewport {

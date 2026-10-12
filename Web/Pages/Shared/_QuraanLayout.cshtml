@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    @{
+        ViewData["Title"] = "موقع 🧕👑يسرلي ونورلي☀️🔊 لحفظ القرءآن الكريم مسموع ومقروء " + ViewData["surah"];
+    }
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
@@ -72,6 +75,13 @@
                 background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
                 padding: 15px 20px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .quraan-navbar.no-sticky {
+                position: relative;
             }
 
                 .quraan-navbar .container {
@@ -109,6 +119,37 @@
                     transform: scale(0.95);
                 }
 
+            .zoom-controls {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .zoom-btn {
+                background: rgba(255,255,255,0.2);
+                border: 2px solid rgba(255,255,255,0.3);
+                color: #ffffff;
+                padding: 8px 14px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 1.2rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                min-width: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .zoom-btn:hover {
+                    background: rgba(255,255,255,0.3);
+                    transform: scale(1.05);
+                }
+
+                .zoom-btn:active {
+                    transform: scale(0.95);
+                }
+
             /* Theme-specific navbar styles */
             .simple-dark-mode .quraan-navbar {
                 background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -131,23 +172,17 @@
                 margin: 0 auto;
             }
 
-            /* Large screens - 115% zoom */
-            @@media (min-width: 1200px) {
-                html {
-                    zoom: 1.15;
-                }
-            }
-
-            /* Small screens - 80% zoom */
-            @@media (max-width: 600px) {
-                html {
-                    zoom: 0.8;
-                }
+            .main-layout.has-sheikh-card {
+                padding-top: 130px;
             }
 
             .content-area {
                 flex: 1;
                 min-width: 0;
+            }
+
+            .content-area.full-width {
+                width: 100%;
             }
 
             /* Sidebar Styles */
@@ -191,7 +226,55 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 margin-bottom: 20px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1001;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px 20px;
             }
+
+            .sheikh-card-content {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex: 1;
+            }
+
+            .sheikh-card-zoom-controls {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                margin-right: 15px;
+            }
+
+            .sheikh-zoom-btn {
+                background: rgba(255,255,255,0.15);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: #ffffff;
+                padding: 8px 14px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1.2rem;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                min-width: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .sheikh-zoom-btn:hover {
+                    background: rgba(255,255,255,0.25);
+                    transform: scale(1.05);
+                }
+
+                .sheikh-zoom-btn:active {
+                    transform: scale(0.95);
+                }
 
                 .person-card:hover {
                     transform: translateX(5px);
@@ -366,7 +449,7 @@
                 }
 
                 .person-card {
-                    padding: 10px;
+                    padding: 16px;
                     gap: 8px;
                 }
 
@@ -400,21 +483,69 @@
                     order: 0;
                 }
             }
+
+            .quran-surah-page-div {
+                font-size: 2.2em;
+                text-align: justify;
+                font-family: conv_original-hafs;
+                color: #17274a;
+                padding: 110px 0 0 0px !important;
+                font-weight: 400;
+                line-height: 1.90em;
+                margin: 0 0 1em;
+                text-align: justify;
+            }
+
+            .h2-quran-page {
+                font-size: 1em;
+                font-family: conv_original-hafs;
+                text-align: center;
+                background: #ff00004a;
+                color: #ffffff;
+            }
+
+            .img-basmalah {
+                max-width: 75%;
+                border-radius: 0%;
+                text-align: center;
+                background: #ff00004a;
+                color: #ffffff;
+                outline: dashed;
+                outline-width: 7px;
+                margin: 15px 0px 0px 0px;
+            }
+
+            .p-inDiv {
+                text-align: center;
+            }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="quraan-navbar">
+    <nav class="quraan-navbar" id="main-navbar">
         <div class="container">
-            <a class="navbar-brand">قرأن كريم مسموع ومقروء</a>
-            <button class="theme-toggle-btn" onclick="toggleTheme()" title="تبديل الاستايل">
-                <span id="theme-label">استايل 1</span>
-            </button>
+            <a class="navbar-brand">@ViewData["Title"]</a>
+            <div style="display: flex; gap: 10px; align-items: center;" id="navbar-controls">
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="decreaseZoom()" title="تصغير">-</button>
+                    <button class="zoom-btn" onclick="increaseZoom()" title="تكبير">+</button>
+                </div>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="تبديل الاستايل">
+                    <span id="theme-label">استايل 1</span>
+                </button>
+            </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="main-layout">
+    @{
+        var mainLayoutClass = "main-layout";
+        if (ViewData["SheikhId"] as string != null)
+        {
+            mainLayoutClass += " has-sheikh-card";
+        }
+    }
+    <div class="@mainLayoutClass">
         <!-- Sidebar - Only show on Fehrs page -->
         @if (ViewData["ShowSidebar"] as bool? == true)
         {
@@ -424,25 +555,68 @@
         }
 
         <!-- Content Area -->
-        <div class="content-area" style="@(ViewData["ShowSidebar"] as bool? == true ? "" : "width: 100%;")">
-            <!-- Sheikh Card - Show above ac-app when SheikhId exists in route -->
-            @if (!string.IsNullOrEmpty(ViewData["SheikhId"] as string))
-            {
-                var sheikhName = ViewData["SheikhName"] as string;
-                var sheikhImage = ViewData["SheikhImage"] as string;
-                var sheikhDescription = ViewData["SheikhDescription"] as string;
-                <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; margin-bottom: 20px;">
-                    <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
-                    <div class="person-info">
-                        <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
-                        <div class="person-name" style="margin-top:0px;line-height: 1.5;" >@sheikhName</div>
-                        <div class="person-description">@sheikhDescription</div>
+        @if (ViewData["ShowSidebar"] as bool? == true)
+        {
+            <div class="content-area">
+                <!-- Sheikh Card - Show above ac-app when SheikhId exists in route -->
+                @if (!string.IsNullOrEmpty(ViewData["SheikhId"] as string))
+                {
+                    var sheikhName = ViewData["SheikhName"] as string;
+                    var sheikhImage = ViewData["SheikhImage"] as string;
+                    var sheikhDescription = ViewData["SheikhDescription"] as string;
+                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; margin-bottom: 5px;  max-height: 82px !important;">
+                        <div class="sheikh-card-content">
+                            <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
+                            <div class="person-info">
+                                <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
+                                <div class="person-name" style="margin-top:0px;line-height: 1.5;" >@sheikhName</div>
+                                <div class="person-description">@sheikhDescription</div>
+                            </div>
+                        </div>
+                        <div class="sheikh-card-zoom-controls">
+                            <button class="sheikh-zoom-btn" onclick="decreaseZoom()" title="تصغير نص القرءآن">-</button>
+                            <button class="sheikh-zoom-btn" onclick="increaseZoom()" title="تكبير نص القرءآن">+</button>
+                        </div>
                     </div>
-                </div>
-            }
+                }
 
-            @RenderBody()
-        </div>
+                @RenderBody()
+            </div>
+        }
+        else
+        {
+            var hasSheikhCard = ViewData["SheikhId"] as string != null;
+            var contentAreaClass = "content-area full-width";
+            if (hasSheikhCard)
+            {
+                contentAreaClass += " has-sheikh-card";
+            }
+            <div class="@contentAreaClass">
+                <!-- Sheikh Card - Show above ac-app when SheikhId exists in route -->
+                @if (!string.IsNullOrEmpty(ViewData["SheikhId"] as string))
+                {
+                    var sheikhName = ViewData["SheikhName"] as string;
+                    var sheikhImage = ViewData["SheikhImage"] as string;
+                    var sheikhDescription = ViewData["SheikhDescription"] as string;
+                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; margin-bottom: 5px; max-height: 82px !important;">
+                        <div class="sheikh-card-content">
+                            <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
+                            <div class="person-info">
+                                <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
+                                <div class="person-name" style="margin-top:0px;line-height: 1.5;" >@sheikhName</div>
+                                <div class="person-description">@sheikhDescription</div>
+                            </div>
+                        </div>
+                        <div class="sheikh-card-zoom-controls">
+                            <button class="sheikh-zoom-btn" onclick="decreaseZoom()" title="تصغير نص القرءآن">-</button>
+                            <button class="sheikh-zoom-btn" onclick="increaseZoom()" title="تكبير نص القرءآن">+</button>
+                        </div>
+                    </div>
+                }
+
+                @RenderBody()
+            </div>
+        }
     </div>
 
     <!-- JavaScript for Theme Switching -->
@@ -472,6 +646,79 @@
 
                 const themeLabel = document.getElementById('theme-label');
                 themeLabel.textContent = savedTheme === 'Quraan1' ? 'استايل 1' : 'استايل 2';
+
+                // Check if sheikh card exists and adjust navbar
+                const sheikhCard = document.querySelector('.sheikh-card-full-width');
+                const navbar = document.getElementById('main-navbar');
+                const navbarControls = document.getElementById('navbar-controls');
+
+                if (sheikhCard) {
+                    // Hide navbar controls and make navbar non-sticky
+                    if (navbarControls) {
+                        navbarControls.style.display = 'none';
+                    }
+                    if (navbar) {
+                        navbar.classList.add('no-sticky');
+                    }
+                }
+
+                // Check screen width and apply zoom for small screens
+                if (window.innerWidth < 600) {
+                    // Small screen - set to minimum zoom (50%)
+                    document.documentElement.style.zoom = '0.5';
+                    localStorage.setItem('quraanZoom', '0.5');
+                    localStorage.setItem('quraanIsSmallScreen', 'true');
+                    // Reset manual flag on initial load
+                    localStorage.setItem('quraanUserManuallySetZoom', 'false');
+                } else {
+                    // Load saved zoom level for larger screens
+                    const savedZoom = localStorage.getItem('quraanZoom') || '1.0';
+                    document.documentElement.style.zoom = savedZoom;
+                    localStorage.setItem('quraanIsSmallScreen', 'false');
+                }
+            });
+
+            // Zoom control logic
+            function increaseZoom() {
+                let currentZoom = parseFloat(document.documentElement.style.zoom) || 1.0;
+                currentZoom = Math.min(currentZoom + 0.1, 2.0); // Max 200%
+                document.documentElement.style.zoom = currentZoom;
+                localStorage.setItem('quraanZoom', currentZoom.toString());
+                // Mark that user manually changed zoom
+                localStorage.setItem('quraanUserManuallySetZoom', 'true');
+            }
+
+            function decreaseZoom() {
+                let currentZoom = parseFloat(document.documentElement.style.zoom) || 1.0;
+                currentZoom = Math.max(currentZoom - 0.1, 0.5); // Min 50%
+                document.documentElement.style.zoom = currentZoom;
+                localStorage.setItem('quraanZoom', currentZoom.toString());
+                // Mark that user manually changed zoom
+                localStorage.setItem('quraanUserManuallySetZoom', 'true');
+            }
+
+            // Handle window resize - only auto-set if user hasn't manually adjusted
+            window.addEventListener('resize', function() {
+                const userManuallySet = localStorage.getItem('quraanUserManuallySetZoom') === 'true';
+
+                if (window.innerWidth < 600) {
+                    // Small screen - only auto-set to 50% if user hasn't manually adjusted
+                    if (!userManuallySet) {
+                        document.documentElement.style.zoom = '0.5';
+                        localStorage.setItem('quraanZoom', '0.5');
+                        localStorage.setItem('quraanIsSmallScreen', 'true');
+                    }
+                } else {
+                    // Larger screen - restore saved zoom or default to 1.0
+                    const savedZoom = localStorage.getItem('quraanZoom') || '1.0';
+                    if (parseFloat(savedZoom) > 0.5) {
+                        document.documentElement.style.zoom = savedZoom;
+                    } else {
+                        document.documentElement.style.zoom = '1.0';
+                        localStorage.setItem('quraanZoom', '1.0');
+                    }
+                    localStorage.setItem('quraanIsSmallScreen', 'false');
+                }
             });
     </script>
 

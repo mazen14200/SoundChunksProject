@@ -1385,7 +1385,9 @@
     if (!ayahSpans || !ayahSpans.length) return;
 
     // top panel
-    const topPanel = el('section', 'qp-panel qp-top', { 'aria-label': 'مشغل الآيات' });
+    const hasSheikhCard = document.querySelector('.sheikh-card-full-width') !== null;
+    const topPanelClass = hasSheikhCard ? 'qp-panel qp-top has-sheikh-card' : 'qp-panel qp-top';
+    const topPanel = el('section', topPanelClass, { 'aria-label': 'مشغل الآيات' });
     const bar = el('div', 'qp-top-bar');
     const fromInput = el('input', 'qp-num', { type: 'number', min: '1', step: '1', inputmode: 'numeric', 'aria-label': 'من آية', placeholder: '1' });
     const toInput = el('input', 'qp-num', { type: 'number', min: '1', step: '1', inputmode: 'numeric', 'aria-label': 'إلى آية', placeholder: '1' });
@@ -1485,7 +1487,14 @@
             const r = target.getBoundingClientRect();
             const headroom = topPanel.offsetHeight + 16;
             if (r.top < headroom || r.bottom > window.innerHeight - 24) {
-                target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                // Scroll to place target in the bottom third of the screen
+                const targetPosition = window.innerHeight * 0.67;
+                const currentScroll = window.pageYOffset;
+                const targetOffset = target.getBoundingClientRect().top + currentScroll;
+                window.scrollTo({
+                    top: targetOffset - targetPosition,
+                    behavior: 'smooth'
+                });
             }
         }
     }

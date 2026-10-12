@@ -1,16 +1,16 @@
 ﻿@page
 @{
     Layout = "_QuraanLayout";
-    ViewData["Title"] = "سورة الحشر مكتوبة";
+    ViewData["surah"] = "سورة الحشر";
+    ViewData["Title"] = "موقع 🧕👑يسرلي ونورلي☀️🔊 لحفظ القرءآن - " + ViewData["surah"];
 }
 
 <div class="ac-app" id="app">
 
-
-
-    <div style="font-size:2.2em;text-align:justify;font-family:conv_original-hafs;color:#17274a;font-weight:400;line-height:1.90em;margin:0 0 1em">
-        <a id="reading" name="1"><h2 style="font-size: 1em;font-family: conv_original-hafs;text-align: center;">سورة الحشر مكتوبة كاملة بالتشكيل | كتابة وقراءة</h2></a>
-        <p style="text-align: center;"><img loading="lazy" alt="بسم الله الرحمن الرحيم" style="max-width: 75%; border-radius:0%;text-align: center; " src="~/img/basmalah.png"></p>
+    
+    <div class="quran-surah-page-div">
+        <a id="reading" name="1"><h2 class="h2-quran-page">@ViewData["surah"] مكتوبة كاملة بالتشكيل | كتابة وقراءة</h2></a>
+        <p class="p-inDiv"><img loading="lazy" alt="بسم الله الرحمن الرحيم" class="img-basmalah" src="~/img/basmalah.png"></p>
 
         سَبَّحَ <b>لِلَّهِ</b> مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۖ وَهُوَ ٱلۡعَزِيزُ ٱلۡحَكِيمُ
         <label>(1)</label> هُوَ ٱلَّذِيٓ أَخۡرَجَ ٱلَّذِينَ كَفَرُواْ مِنۡ أَهۡلِ ٱلۡكِتَٰبِ مِن دِيَٰرِهِمۡ
