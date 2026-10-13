@@ -353,6 +353,10 @@
                 background: linear-gradient(135deg, #101D3A 0%, #243B64 55%, #344F78 100%);
             }
 
+            .card-blue2 {
+                background: linear-gradient(135deg, #101D3A 0%, #243B64 55%, #344F78 100%);
+            }
+
             .card-green {
                 background: linear-gradient(135deg, #102E28 0%, #1C5143 55%, #286653 100%);
             }
@@ -375,7 +379,7 @@
 
                 /* Elegant Typography */
 
-                .card-blue .person-name,
+                .card-blue .card-blue2 .person-name,
                 .card-green .person-name,
                 .card-orange .person-name,
                 .card-purple .person-name,
@@ -386,6 +390,7 @@
                 }
 
                 .card-blue .person-description,
+                .card-blue2 .person-description,
                 .card-green .person-description,
                 .card-orange .person-description,
                 .card-purple .person-description,
@@ -404,6 +409,13 @@
             .card-teal {
                 border: 1px solid rgba(220, 195, 155, 0.12);
                 border-radius: 16px;
+                box-shadow: 0 8px 24px rgba(8, 12, 24, 0.16);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .card-blue2 {
+                border: 0px solid rgba(220, 195, 155, 0.12);
+                border-radius: 0px;
                 box-shadow: 0 8px 24px rgba(8, 12, 24, 0.16);
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
             }
@@ -610,12 +622,12 @@
                     var sheikhName = ViewData["SheikhName"] as string;
                     var sheikhImage = ViewData["SheikhImage"] as string;
                     var sheikhDescription = ViewData["SheikhDescription"] as string;
-                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; max-height: 82px !important;">
+                    <div class="sheikh-card-full-width person-card card-blue2" style="width: 100%; max-height: 82px !important;">
                         <div class="sheikh-card-content">
                             <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
                             <div class="person-info">
                                 <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
-                                <div class="person-name" style="margin-top:0px;line-height: 1.5;font-size: 18px;">@sheikhName</div>
+                                <div class="person-name" style="margin-top:0px;line-height: 1.5;font-size: 19px;">@sheikhName</div>
                                 <div class="person-description">@sheikhDescription</div>
                             </div>
                         </div>
@@ -644,12 +656,12 @@
                     var sheikhName = ViewData["SheikhName"] as string;
                     var sheikhImage = ViewData["SheikhImage"] as string;
                     var sheikhDescription = ViewData["SheikhDescription"] as string;
-                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; max-height: 82px !important;">
+                    <div class="sheikh-card-full-width person-card card-blue2" style="width: 100%; max-height: 82px !important;">
                         <div class="sheikh-card-content">
                             <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
                             <div class="person-info">
                                 <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
-                                <div class="person-name" style="margin-top:0px;line-height: 1.5;font-size: 18px;">@sheikhName</div>
+                                <div class="person-name" style="margin-top:0px;line-height: 1.5;font-size: 19px;">@sheikhName</div>
                                 <div class="person-description">@sheikhDescription</div>
                             </div>
                         </div>
