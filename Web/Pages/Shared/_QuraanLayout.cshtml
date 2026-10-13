@@ -78,17 +78,45 @@
                 position: sticky;
                 top: 0;
                 z-index: 1000;
+                width: 100%;
             }
 
             .quraan-navbar.no-sticky {
                 position: relative;
             }
 
+            /* Mobile screens - keep navbar sticky even with sheikh card */
+            @@media (max-width: 800px) {
+                .quraan-navbar.no-sticky {
+                    position: fixed;
+                    z-index: 10000;
+                }
+
+                .main-layout.has-sheikh-card {
+                    padding-top: 85px;
+                }
+
+                .sheikh-card-full-width {
+                    margin-top: 60px;
+                }
+
+                .quraan-navbar .navbar-brand {
+                    font-size: 1rem;
+                }
+            }
+
+            @@media (max-width: 400px) {
+                .quraan-navbar .navbar-brand {
+                    font-size: 0.85rem;
+                }
+            }
+
                 .quraan-navbar .container {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    max-width: 1200px;
+                    width: 100%;
+                    max-width: 100%;
                     margin: 0 auto;
                 }
 
@@ -97,6 +125,10 @@
                     font-size: 1.5rem;
                     font-weight: bold;
                     text-decoration: none;
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
 
             .theme-toggle-btn {
@@ -225,7 +257,7 @@
             .sheikh-card-full-width {
                 width: 100% !important;
                 max-width: 100% !important;
-                margin-bottom: 20px;
+                margin-bottom: 5px;
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -467,7 +499,7 @@
                 }
             }
 
-            @@media (max-width: 600px) {
+            @@media (max-width: 800px) {
                 .main-layout {
                     flex-direction: column;
                 }
@@ -489,11 +521,25 @@
                 text-align: justify;
                 font-family: conv_original-hafs;
                 color: #17274a;
-                padding: 110px 0 0 0px !important;
+                padding: 100px 0 0 0px !important;
                 font-weight: 400;
                 line-height: 1.90em;
                 margin: 0 0 1em;
                 text-align: justify;
+            }
+
+            @@media(max-width: 800px){
+                .quran-surah-page-div {
+                    font-size: 2.2em;
+                    text-align: justify;
+                    font-family: conv_original-hafs;
+                    color: #17274a;
+                    padding: 211px 0 0 0px !important;
+                    font-weight: 400;
+                    line-height: 1.90em;
+                    margin: 0 0 1em;
+                    text-align: justify;
+                }
             }
 
             .h2-quran-page {
@@ -564,12 +610,12 @@
                     var sheikhName = ViewData["SheikhName"] as string;
                     var sheikhImage = ViewData["SheikhImage"] as string;
                     var sheikhDescription = ViewData["SheikhDescription"] as string;
-                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; margin-bottom: 5px;  max-height: 82px !important;">
+                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; max-height: 82px !important;">
                         <div class="sheikh-card-content">
                             <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
                             <div class="person-info">
                                 <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
-                                <div class="person-name" style="margin-top:0px;line-height: 1.5;" >@sheikhName</div>
+                                <div class="person-name" style="margin-top:0px;line-height: 1.5;font-size: 18px;">@sheikhName</div>
                                 <div class="person-description">@sheikhDescription</div>
                             </div>
                         </div>
@@ -598,12 +644,12 @@
                     var sheikhName = ViewData["SheikhName"] as string;
                     var sheikhImage = ViewData["SheikhImage"] as string;
                     var sheikhDescription = ViewData["SheikhDescription"] as string;
-                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; margin-bottom: 5px; max-height: 82px !important;">
+                    <div class="sheikh-card-full-width person-card card-blue" style="width: 100%; max-height: 82px !important;">
                         <div class="sheikh-card-content">
                             <img src="~/@sheikhImage" alt="@sheikhName" class="person-image" />
                             <div class="person-info">
                                 <div class="person-description" style="margin-top:-6px;line-height: 1.8;">القارئ المختار</div>
-                                <div class="person-name" style="margin-top:0px;line-height: 1.5;" >@sheikhName</div>
+                                <div class="person-name" style="margin-top:0px;line-height: 1.5;font-size: 18px;">@sheikhName</div>
                                 <div class="person-description">@sheikhDescription</div>
                             </div>
                         </div>
